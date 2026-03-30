@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRAC PRO — MATVARD</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #EAECEF; color: #333; font-size: 13px; }
+
+/* ── LAYOUT ── */
+.app { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 240px; min-width: 240px; background: #1A1F2E; display: flex; flex-direction: column; overflow: hidden; }
+.main { flex: 1; overflow-y: auto; padding: 20px; }
+
+/* ── SIDEBAR ── */
+.sidebar-logo { background: #4A235A; padding: 16px; text-align: center; }
+.sidebar-logo h1 { color: white; font-size: 15px; margin-bottom: 2px; }
+.sidebar-logo p  { color: rgba(255,255,255,0.5); font-size: 10px; }
+
+.sidebar-section { padding: 12px 16px 6px; color: rgba(255,255,255,0.4); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+
+.sidebar-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; color: rgba(255,255,255,0.75); cursor: pointer;
+  border: none; background: none; width: 100%; text-align: left;
+  font-family: Arial, sans-serif; font-size: 12px; transition: background 0.15s;
+}
+.sidebar-btn:hover { background: rgba(255,255,255,0.07); }
+.sidebar-btn.active { background: rgba(74,35,90,0.6); color: white; border-left: 3px solid #9B59B6; }
+.sidebar-btn .icon { font-size: 14px; width: 18px; text-align: center; }
+
+.sidebar-hist { flex: 1; overflow-y: auto; padding-bottom: 12px; }
+.hist-item {
+  padding: 8px 16px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: background 0.15s;
+}
+.hist-item:hover { background: rgba(255,255,255,0.06); }
+.hist-item.active-item { background: rgba(74,35,90,0.5); border-left: 3px solid #9B59B6; }
+.hist-item .hi-par   { color: white; font-size: 12px; font-weight: bold; }
+.hist-item .hi-fecha { color: rgba(255,255,255,0.4); font-size: 10px; }
+.hist-item .hi-esc   { font-size: 10px; margin-top: 2px; }
+.hist-item .hi-del   { float: right; color: rgba(255,255,255,0.25); font-size: 11px; cursor: pointer; }
+.hist-item .hi-del:hover { color: #E74C3C; }
+
+.sidebar-actions { padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 6px; }
+.sb-action-btn {
+  padding: 8px 12px; border-radius: 6px; border: none; cursor: pointer;
+  font-size: 11px; font-family: Arial, sans-serif; font-weight: bold; width: 100%; transition: opacity 0.2s;
+}
+.sb-action-btn:hover { opacity: 0.85; }
+.btn-nuevo   { background: #4A235A; color: white; }
+.btn-guardar { background: #1A5C3A; color: white; }
+.btn-export  { background: #1A3A5C; color: white; }
+.btn-print   { background: #555; color: white; }
+
+/* ── CARD ── */
+.card { background: white; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 16px; overflow: hidden; }
+.card-header { padding: 12px 18px; font-size: 12px; font-weight: bold; color: white; display: flex; align-items: center; gap: 8px; }
+.card-body { padding: 16px 18px; }
+
+/* ── TÍTULO PRAC ── */
+.prac-title { background: #4A235A; }
+.title-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.title-inp {
+  background: transparent; border: none; border-bottom: 2px dashed rgba(255,255,255,0.4);
+  color: white; font-size: 15px; font-weight: bold; font-family: Arial, sans-serif;
+  outline: none; text-align: center; padding: 2px 4px;
+}
+.title-inp::placeholder { color: rgba(255,255,255,0.35); }
+.title-inp.par   { width: 90px; }
+.title-inp.fecha { width: 140px; }
+.title-inp.precio { width: 90px; }
+
+/* ── TABLA PRAC ── */
+.prac-table { width: 100%; border-collapse: collapse; }
+.prac-table th { background: #2C3E50; color: white; padding: 9px 12px; font-size: 11px; text-align: center; }
+.prac-table th:first-child { text-align: left; }
+.prac-table tbody tr:nth-child(odd)  { background: #F8F9FA; }
+.prac-table tbody tr:nth-child(even) { background: #FFFFFF; }
+.prac-table td { padding: 9px 12px; font-size: 12px; text-align: center; border-bottom: 1px solid #E9ECEF; vertical-align: middle; }
+.prac-table td:first-child { text-align: left; font-weight: bold; }
+.dva-y { color: #555; } .dva-q { color: #6F42C1; } .dva-m { color: #E67E22; } .dva-w { color: #1A7A3A; }
+
+.td-inp {
+  background: transparent; border: none; border-bottom: 1.5px dashed #CCC;
+  font-size: 11px; font-family: Arial,sans-serif; color: #333; width: 100%;
+  text-align: center; outline: none; padding: 2px 4px;
+}
+.td-inp::placeholder { color: #CCC; }
+
+.cond-sel, .dir-sel {
+  border: 1.5px dashed #CCC; border-radius: 4px; font-size: 11px;
+  font-family: Arial,sans-serif; padding: 3px 6px; background: #fff;
+  outline: none; cursor: pointer; color: #555; transition: all 0.2s;
+}
+
+/* ── ESCENARIO ── */
+.esc-box { background: #FFFBEA; border: 1.5px solid #F0C040; border-radius: 8px; padding: 14px; }
+.esc-inp {
+  background: transparent; border: none; border-bottom: 1.5px dashed #D4A800;
+  font-size: 13px; font-weight: bold; font-family: Arial,sans-serif;
+  color: #7D5B00; outline: none; width: 100%; margin-bottom: 6px;
+}
+.esc-inp::placeholder { color: #C8A84B; }
+.esc-ta {
+  background: transparent; border: none; border-bottom: 1.5px dashed #D4A800;
+  font-size: 11px; font-family: Arial,sans-serif; color: #8A6500;
+  outline: none; width: 100%; resize: none; height: 40px;
+}
+.esc-ta::placeholder { color: #C8B490; }
+
+/* ── NOTICIAS ── */
+.news-header { background: #1A3A5C; }
+.news-table { width: 100%; border-collapse: collapse; }
+.news-table th { background: #2C3E50; color: white; padding: 8px 10px; font-size: 11px; text-align: center; }
+.news-table td { padding: 7px 10px; font-size: 11px; border-bottom: 1px solid #EEE; vertical-align: middle; }
+.news-table tr:nth-child(odd) { background: #F8F9FA; }
+.news-inp { background: transparent; border: none; border-bottom: 1px dashed #CCC; font-size: 11px; font-family: Arial,sans-serif; color: #333; width: 100%; outline: none; padding: 1px 2px; }
+.news-inp::placeholder { color: #CCC; }
+.imp-sel { border: 1px solid #DDD; border-radius: 4px; font-size: 10px; padding: 2px 4px; background: white; cursor: pointer; outline: none; }
+.add-row-btn { background: none; border: 1px dashed #CCC; color: #888; font-size: 11px; padding: 5px 14px; border-radius: 6px; cursor: pointer; margin-top: 8px; font-family: Arial,sans-serif; transition: all 0.2s; }
+.add-row-btn:hover { background: #F0F0F0; color: #333; }
+
+/* ── CALCULADORA ── */
+.calc-header { background: #8A5500; }
+.calc-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.calc-group { display: flex; flex-direction: column; gap: 4px; }
+.calc-group label { font-size: 10px; font-weight: bold; color: #777; text-transform: uppercase; }
+.calc-inp {
+  border: 1.5px solid #DDD; border-radius: 6px; padding: 8px 10px;
+  font-size: 13px; font-family: Arial,sans-serif; color: #333; outline: none;
+  transition: border-color 0.2s; width: 100%;
+}
+.calc-inp:focus { border-color: #8A5500; }
+.calc-inp.input-azul { border-color: #1A3A5C; background: #F0F4FF; font-weight: bold; color: #1A3A5C; }
+.calc-result { background: #FFFBEA; border: 1.5px solid #F0C040; border-radius: 6px; padding: 8px 10px; font-size: 14px; font-weight: bold; color: #7D5B00; text-align: center; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+.calc-result.verde { background: #F0FFF4; border-color: #1A7A3A; color: #1A7A3A; }
+.calc-result.rojo  { background: #FEF0F0; border-color: #DC3545; color: #DC3545; }
+.calc-nota { font-size: 10px; color: #888; margin-top: 2px; }
+
+/* ── HIPÓTESIS ── */
+.hip-header-card { background: #2C3E50; }
+.hip-sub { text-align: center; font-size: 11px; color: #888; padding: 6px 0 14px; }
+.hip-box { border-radius: 8px; padding: 14px; position: relative; overflow: hidden; margin-bottom: 12px; }
+.hip-box::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
+.hip-h1 { background: #FEF0F0; border: 1.5px solid #DC3545; } .hip-h1::before { background: #DC3545; }
+.hip-h2 { background: #F0FFF4; border: 1.5px solid #1A7A3A; } .hip-h2::before { background: #1A7A3A; }
+.hip-h3 { background: #FFFBEA; border: 1.5px solid #E67E22; } .hip-h3::before { background: #E67E22; }
+.hip-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding-left: 6px; }
+.hip-num { font-size: 13px; font-weight: bold; }
+.hip-h1 .hip-num { color: #922B21; } .hip-h2 .hip-num { color: #1A7A3A; } .hip-h3 .hip-num { color: #7D5B00; }
+.hip-sel { border: 1.5px dashed #CCC; border-radius: 4px; font-size: 11px; font-family: Arial,sans-serif; padding: 3px 8px; background: white; cursor: pointer; outline: none; color: #555; transition: all 0.2s; }
+.hip-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-left: 6px; }
+.hip-campo { display: flex; flex-direction: column; gap: 3px; }
+.hip-campo label { font-size: 10px; font-weight: bold; color: #888; text-transform: uppercase; }
+.hip-campo input, .hip-campo textarea {
+  border: none; border-bottom: 1.5px dashed #CCC; background: transparent;
+  font-size: 11px; font-family: Arial,sans-serif; color: #333; outline: none;
+  padding: 3px 2px; resize: none;
+}
+.hip-campo input::placeholder, .hip-campo textarea::placeholder { color: #CCC; }
+.hip-campo-full { grid-column: 1 / -1; }
+.rr-badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-left: 6px; }
+.rr-ok  { background: #D5F5E3; color: #1A7A3A; }
+.rr-ko  { background: #FADBD8; color: #922B21; }
+.rr-neu { background: #F0F4FF; color: #1A3A5C; }
+
+/* ── REVIEW ── */
+.review-header { background: #1A5C3A; }
+.review-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rev-campo { display: flex; flex-direction: column; gap: 4px; }
+.rev-campo label { font-size: 10px; font-weight: bold; color: #777; text-transform: uppercase; }
+.rev-inp { border: 1.5px solid #DDD; border-radius: 6px; padding: 7px 10px; font-size: 12px; font-family: Arial,sans-serif; color: #333; outline: none; transition: border-color 0.2s; width: 100%; }
+.rev-inp:focus { border-color: #1A5C3A; }
+.rev-ta { border: 1.5px solid #DDD; border-radius: 6px; padding: 7px 10px; font-size: 12px; font-family: Arial,sans-serif; color: #333; outline: none; resize: vertical; width: 100%; min-height: 56px; }
+.rev-ta:focus { border-color: #1A5C3A; }
+.rev-full { grid-column: 1 / -1; }
+.emoji-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.emoji-btn { padding: 5px 12px; border-radius: 20px; border: 1.5px solid #DDD; background: white; cursor: pointer; font-size: 12px; transition: all 0.2s; }
+.emoji-btn:hover { border-color: #888; }
+.emoji-btn.selected { border-color: #4A235A; background: #F5EEFF; font-weight: bold; }
+.yn-row { display: flex; gap: 8px; }
+.yn-btn { padding: 5px 18px; border-radius: 6px; border: 1.5px solid #DDD; background: white; cursor: pointer; font-size: 12px; font-weight: bold; transition: all 0.2s; }
+.yn-btn.yes { border-color: #1A7A3A; background: #F0FFF4; color: #1A7A3A; }
+.yn-btn.no  { border-color: #DC3545; background: #FEF0F0; color: #DC3545; }
+
+/* ── REGLA FINAL ── */
+.regla-box { background: #F0F4FF; border: 1px solid #4A235A; border-radius: 8px; padding: 14px; text-align: center; margin-bottom: 16px; }
+.regla-box strong { display: block; color: #4A235A; font-size: 13px; margin-bottom: 4px; }
+.regla-box p { font-size: 11px; color: #666; margin: 2px 0; }
+
+/* ── TOAST ── */
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1A5C3A; color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 9999; }
+.toast.show { opacity: 1; }
+
+/* ── EMPTY STATE ── */
+.empty-hist { padding: 20px 16px; text-align: center; color: rgba(255,255,255,0.3); font-size: 11px; }
+
+/* ── ESTUDIO CADJPY ── */
+.estudio-header { background: #0A3A2A; cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between; }
+.estudio-header:hover { opacity: 0.9; }
+.estudio-toggle { font-size: 11px; color: rgba(255,255,255,0.5); }
+.estudio-body { display: none; }
+.estudio-body.open { display: block; }
+.est-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.est-grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.est-tf { border: 1px solid #DDD; border-radius: 8px; overflow: hidden; }
+.est-tf-head { padding: 6px 10px; font-size: 10px; font-weight: bold; color: white; display: flex; justify-content: space-between; align-items: center; }
+.est-tf-body { padding: 8px 10px; font-size: 11px; color: #555; line-height: 1.6; }
+.est-tf-price { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 2px; }
+.est-badge { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+.est-ok    { background: #D5F5E3; color: #1A7A3A; }
+.est-warn  { background: #FFFBEA; color: #7D5B00; }
+.est-danger{ background: #FADBD8; color: #922B21; }
+.est-info  { background: #EBF5FB; color: #1A3A5C; }
+.est-zona { border: 1px solid #DDD; border-radius: 8px; padding: 8px 10px; background: #F8F9FA; }
+.est-zona-title { font-size: 10px; font-weight: bold; color: #888; margin-bottom: 2px; text-transform: uppercase; }
+.est-zona-price { font-size: 15px; font-weight: bold; }
+.est-zona-desc { font-size: 10px; color: #888; margin-top: 2px; line-height: 1.4; }
+.est-check { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; border-bottom: 1px solid #F0F0F0; cursor: pointer; }
+.est-check:last-child { border-bottom: none; }
+.est-check:hover { background: #FAFAFA; }
+.est-check.est-done .est-cb { background: #D5F5E3; border-color: #1A7A3A; }
+.est-check.est-done .est-cb::after { content: '✓'; color: #1A7A3A; font-size: 11px; font-weight: bold; }
+.est-check.est-done { opacity: 0.6; }
+.est-cb { width: 20px; height: 20px; border: 1.5px solid #CCC; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; background: white; }
+.est-check-main { font-size: 12px; font-weight: bold; color: #333; margin-bottom: 1px; }
+.est-check-desc { font-size: 10px; color: #888; line-height: 1.4; }
+.est-verdict { padding: 10px 14px; border-radius: 8px; font-size: 12px; font-weight: bold; text-align: center; margin-top: 8px; }
+.est-verdict.nogo  { background: #FADBD8; color: #922B21; }
+.est-verdict.casi  { background: #FFFBEA; color: #7D5B00; }
+.est-verdict.go    { background: #D5F5E3; color: #1A7A3A; }
+.est-sec-title { font-size: 11px; font-weight: bold; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; margin-top: 4px; }
+.est-tabla { width: 100%; border-collapse: collapse; font-size: 11px; }
+.est-tabla th { background: #2C3E50; color: white; padding: 6px 8px; text-align: left; font-size: 10px; }
+.est-tabla td { padding: 6px 8px; border-bottom: 1px solid #EEE; }
+.est-tabla tr:nth-child(even) { background: #F8F9FA; }
+.est-tabla .est-resalt { background: #EBF5FB !important; font-weight: bold; }
+.est-prog { height: 4px; background: #EEE; border-radius: 2px; margin-top: 4px; }
+.est-prog-fill { height: 100%; background: #1A7A3A; border-radius: 2px; transition: width .3s; }
+
+/* ── VISTAS ── */
+.vista { display: none; }
+.vista.active { display: block; }
+.sidebar-btn.active { background: rgba(74,35,90,0.6); color: white; border-left: 3px solid #9B59B6; }
+
+/* ── DASHBOARD ── */
+.dash-kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 16px; }
+.dash-kpi { background: white; border-radius: 10px; padding: 16px 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); text-align: center; }
+.dash-kpi-val { font-size: 28px; font-weight: bold; margin-bottom: 2px; }
+.dash-kpi-lbl { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+.dash-kpi-sub { font-size: 11px; color: #AAA; margin-top: 2px; }
+.dash-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.dash-card { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.dash-card-title { font-size: 11px; font-weight: bold; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+.dash-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.dash-bar-lbl { font-size: 11px; color: #555; min-width: 60px; }
+.dash-bar-track { flex: 1; height: 8px; background: #EEE; border-radius: 4px; overflow: hidden; }
+.dash-bar-fill { height: 100%; border-radius: 4px; transition: width .5s; }
+.dash-bar-val { font-size: 11px; font-weight: bold; min-width: 36px; text-align: right; }
+.dash-streak { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+.dash-streak-dot { width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; }
+.dash-recientes { width: 100%; border-collapse: collapse; font-size: 11px; }
+.dash-recientes th { background: #2C3E50; color: white; padding: 6px 10px; text-align: left; font-size: 10px; }
+.dash-recientes td { padding: 6px 10px; border-bottom: 1px solid #EEE; }
+.dash-recientes tr:nth-child(even) { background: #F8F9FA; }
+canvas#grafico-cuenta { width: 100% !important; }
+
+/* ── FILTROS HISTORIAL ── */
+.filtros-bar { display: flex; gap: 8px; flex-wrap: wrap; padding: 8px 16px; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.08); }
+.filtro-inp { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 5px; color: rgba(255,255,255,0.8); font-size: 10px; padding: 4px 7px; font-family: Arial,sans-serif; width: 100%; outline: none; }
+.filtro-inp::placeholder { color: rgba(255,255,255,0.3); }
+.filtro-sel { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 5px; color: rgba(255,255,255,0.7); font-size: 10px; padding: 4px 6px; font-family: Arial,sans-serif; outline: none; cursor: pointer; width: 100%; }
+.filtro-sel option { background: #1A1F2E; color: white; }
+
+/* ── ALERTAS ── */
+.alerta-header { background: #5A2D82; }
+.alerta-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #EEE; }
+.alerta-item:last-child { border-bottom: none; }
+.alerta-cb { width: 18px; height: 18px; border: 1.5px solid #CCC; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-top: 1px; }
+.alerta-item.done .alerta-cb { background: #D5F5E3; border-color: #1A7A3A; }
+.alerta-item.done .alerta-cb::after { content:'✓'; color:#1A7A3A; font-size:11px; font-weight:bold; }
+.alerta-item.done .alerta-texto { text-decoration: line-through; opacity: 0.5; }
+.alerta-texto { flex:1; }
+.alerta-titulo { font-size: 12px; font-weight: bold; color: #333; }
+.alerta-desc   { font-size: 11px; color: #888; }
+.alerta-nivel  { font-size: 12px; font-weight: bold; font-family: monospace; }
+.alerta-badge  { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+.al-precio { background: #EBF5FB; color: #1A3A5C; }
+.al-fi     { background: #FEF9E7; color: #7D5B00; }
+.al-macro  { background: #FADBD8; color: #922B21; }
+.al-ok     { background: #D5F5E3; color: #1A7A3A; }
+.alerta-add { display: flex; gap: 8px; padding: 10px 14px; background: #F8F9FA; border-top: 1px solid #EEE; }
+.alerta-add input { flex:1; border: 1.5px solid #DDD; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-family: Arial,sans-serif; outline: none; }
+.alerta-add select { border: 1.5px solid #DDD; border-radius: 6px; padding: 6px 8px; font-size: 11px; font-family: Arial,sans-serif; outline: none; cursor: pointer; }
+.alerta-add button { background: #4A235A; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 11px; cursor: pointer; font-family: Arial,sans-serif; font-weight: bold; }
+
+@media print {
+  .sidebar { display: none; }
+  .main { padding: 10px; overflow: visible; }
+  .app { display: block; height: auto; }
+  .sb-action-btn, .add-row-btn { display: none; }
+  body { background: white; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ══ SIDEBAR ══ -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <h1>📊 PRAC PRO</h1>
+    <p>Método MATVARD · Conquer Finance</p>
+  </div>
+
+  <div class="sidebar-section">Acciones</div>
+  <button class="sidebar-btn" id="btn-vista-prac" onclick="setVista('prac')"><span class="icon">📋</span> PRAC / Análisis</button>
+  <button class="sidebar-btn" id="btn-vista-dash" onclick="setVista('dash')"><span class="icon">📊</span> Dashboard</button>
+  <button class="sidebar-btn" onclick="nuevoPrac()"><span class="icon">➕</span> Nuevo PRAC</button>
+  <button class="sidebar-btn" onclick="guardarPrac()"><span class="icon">💾</span> Guardar PRAC</button>
+  <button class="sidebar-btn" onclick="exportarJSON()"><span class="icon">📤</span> Exportar JSON</button>
+  <button class="sidebar-btn" onclick="importarJSON()"><span class="icon">📥</span> Importar JSON</button>
+  <button class="sidebar-btn" onclick="window.print()"><span class="icon">🖨</span> Imprimir / PDF</button>
+
+  <div class="sidebar-section">Filtrar historial</div>
+  <div class="filtros-bar" style="flex-direction:column; gap:5px;">
+    <input class="filtro-inp" id="f-par" placeholder="🔍 Buscar par..." oninput="renderHistorial()"/>
+    <select class="filtro-sel" id="f-esc" onchange="renderHistorial()">
+      <option value="">Todos los escenarios</option>
+      <option value="FA">FA — Fully Aligned</option>
+      <option value="CAT">CAT — Conflicto Alto</option>
+      <option value="CMP">CMP — Conflicto Medio</option>
+    </select>
+    <select class="filtro-sel" id="f-dir" onchange="renderHistorial()">
+      <option value="">Todas las direcciones</option>
+      <option value="LONG">LONG</option>
+      <option value="SHORT">SHORT</option>
+    </select>
+  </div>
+
+  <div class="sidebar-section">Historial</div>
+  <div class="sidebar-hist" id="historial-lista">
+    <div class="empty-hist">Sin PRACs guardados aún.<br>Rellena y pulsa Guardar.</div>
+  </div>
+
+  <div class="sidebar-actions">
+    <button class="sb-action-btn btn-nuevo"   onclick="nuevoPrac()">➕ Nuevo PRAC</button>
+    <button class="sb-action-btn btn-guardar" onclick="guardarPrac()">💾 Guardar</button>
+    <button class="sb-action-btn btn-export"  onclick="exportarTodo()">📦 Exportar todo</button>
+    <button class="sb-action-btn btn-print"   onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+<!-- ══ VISTA DASHBOARD ══ -->
+<div class="vista" id="vista-dash">
+
+  <!-- KPIs -->
+  <div class="dash-kpi-grid" id="dash-kpis">
+    <div class="dash-kpi"><div class="dash-kpi-val" id="d-winrate">—</div><div class="dash-kpi-lbl">Winrate</div><div class="dash-kpi-sub" id="d-wrsub">— trades</div></div>
+    <div class="dash-kpi"><div class="dash-kpi-val" id="d-rganado">—</div><div class="dash-kpi-lbl">R Ganado total</div><div class="dash-kpi-sub" id="d-pnltotal">— en $</div></div>
+    <div class="dash-kpi"><div class="dash-kpi-val" id="d-expectativa">—</div><div class="dash-kpi-lbl">Expectativa / trade</div><div class="dash-kpi-sub">R medio por operación</div></div>
+    <div class="dash-kpi"><div class="dash-kpi-val" id="d-racha">—</div><div class="dash-kpi-lbl">Racha actual</div><div class="dash-kpi-sub" id="d-rachasub">wins / losses</div></div>
+  </div>
+
+  <!-- Gráfico cuenta + breakdown -->
+  <div class="dash-row">
+    <div class="dash-card" style="grid-column:1/-1;">
+      <div class="dash-card-title">📈 Evolución de cuenta ($5.000 base)</div>
+      <canvas id="grafico-cuenta" height="120"></canvas>
+    </div>
+  </div>
+
+  <div class="dash-row">
+    <!-- Por escenario -->
+    <div class="dash-card">
+      <div class="dash-card-title">Por escenario</div>
+      <div id="dash-por-esc"></div>
+    </div>
+    <!-- Por par -->
+    <div class="dash-card">
+      <div class="dash-card-title">Por par</div>
+      <div id="dash-por-par"></div>
+    </div>
+  </div>
+
+  <div class="dash-row">
+    <!-- Racha últimos trades -->
+    <div class="dash-card">
+      <div class="dash-card-title">Últimos resultados</div>
+      <div class="dash-streak" id="dash-streak"></div>
+    </div>
+    <!-- Tabla recientes -->
+    <div class="dash-card">
+      <div class="dash-card-title">Últimos 5 PRACs</div>
+      <table class="dash-recientes"><thead><tr><th>Par</th><th>Fecha</th><th>Hip</th><th>PnL $</th></tr></thead>
+      <tbody id="dash-tabla-rec"></tbody></table>
+    </div>
+  </div>
+
+  <!-- Alertas -->
+  <div class="card">
+    <div class="card-header alerta-header">🔔 Alertas y recordatorios — CADJPY Largo Swing</div>
+    <div id="alertas-lista">
+      <div class="alerta-item" id="al0">
+        <div class="alerta-cb" onclick="toggleAlerta('al0')"></div>
+        <div class="alerta-texto">
+          <div class="alerta-titulo">Precio en zona <span class="alerta-nivel">114.47 – 115.00</span> <span class="alerta-badge al-precio">PRECIO</span></div>
+          <div class="alerta-desc">Confluencia DVA 4H + retest ruptura 2H + DVAH Mensual + VWAP Trim. Poner alerta en TradingView.</div>
+        </div>
+      </div>
+      <div class="alerta-item" id="al1">
+        <div class="alerta-cb" onclick="toggleAlerta('al1')"></div>
+        <div class="alerta-texto">
+          <div class="alerta-titulo">Indicador Fi — JPY <span class="alerta-nivel">&lt; +15</span> <span class="alerta-badge al-fi">Fi</span></div>
+          <div class="alerta-desc">Estaba en +50. Necesita normalizar para reducir presión bajista sobre el JPY.</div>
+        </div>
+      </div>
+      <div class="alerta-item" id="al2">
+        <div class="alerta-cb" onclick="toggleAlerta('al2')"></div>
+        <div class="alerta-texto">
+          <div class="alerta-titulo">Indicador Fi — CAD girando a positivo <span class="alerta-badge al-fi">Fi</span></div>
+          <div class="alerta-desc">CAD estaba en negativo. No necesita +20, con salir de zona muy negativa es suficiente.</div>
+        </div>
+      </div>
+      <div class="alerta-item" id="al3">
+        <div class="alerta-cb" onclick="toggleAlerta('al3')"></div>
+        <div class="alerta-texto">
+          <div class="alerta-titulo">Vela reversión 1H/15min en zona <span class="alerta-badge al-ok">TÉCNICO</span></div>
+          <div class="alerta-desc">Martillo, pin bar o envolvente alcista con cierre dentro de 114.47–115.00. MACD histograma reduciendo.</div>
+        </div>
+      </div>
+      <div class="alerta-item" id="al4">
+        <div class="alerta-cb" onclick="toggleAlerta('al4')"></div>
+        <div class="alerta-texto">
+          <div class="alerta-titulo">INVALIDACIÓN — Cierre 4H bajo <span class="alerta-nivel">113.84</span> <span class="alerta-badge al-macro">MACRO</span></div>
+          <div class="alerta-desc">Si el precio cierra en 4H bajo este nivel, hipótesis alcista descartada. No operar largo.</div>
+        </div>
+      </div>
+      <div class="alerta-item" id="al5">
+        <div class="alerta-cb" onclick="toggleAlerta('al5')"></div>
+        <div class="alerta-texto">
+          <div class="alerta-titulo">Decisión BoJ — riesgo macro <span class="alerta-badge al-macro">MACRO</span></div>
+          <div class="alerta-desc">Si BoJ sube tipos o hace forward guidance hawkish agresivo → JPY se fortalece → invalidación total del largo.</div>
+        </div>
+      </div>
+    </div>
+    <div class="alerta-add">
+      <input id="alerta-nueva-txt" placeholder="Nueva alerta o recordatorio..."/>
+      <select id="alerta-nueva-tipo">
+        <option value="al-precio">Precio</option>
+        <option value="al-fi">Fi</option>
+        <option value="al-macro">Macro</option>
+        <option value="al-ok">Técnico</option>
+      </select>
+      <button onclick="addAlerta()">+ Añadir</button>
+    </div>
+  </div>
+
+</div><!-- /vista-dash -->
+
+<!-- ══ VISTA PRAC ══ -->
+<div class="vista active" id="vista-prac">
+  <div class="card">
+    <div class="card-header prac-title" style="justify-content:center; font-size:15px;">
+      <div class="title-row" style="justify-content:center;">
+        PRAC COMPLETO —
+        <input id="par"    class="title-inp par"    placeholder="PAR" />
+        &nbsp;·&nbsp;
+        <input id="fecha"  class="title-inp fecha"  placeholder="Fecha" />
+        &nbsp;·&nbsp; Precio:
+        <input id="precio" class="title-inp precio" placeholder="0.0000" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ESTUDIO CADJPY — 30 Mar 2026 ══ -->
+  <div class="card" id="card-estudio-cadjpy">
+    <div class="card-header estudio-header" onclick="toggleEstudio()">
+      <span>🇨🇦🇯🇵 Estudio CADJPY — Largo Swing · 30 Mar 2026</span>
+      <span class="estudio-toggle" id="estudio-toggle-icon">▼ mostrar</span>
+    </div>
+    <div class="estudio-body" id="estudio-body">
+      <div class="card-body">
+
+        <!-- 4 TF DVA -->
+        <div class="est-sec-title">Análisis DVA Multitemporal</div>
+        <div class="est-grid2">
+          <div class="est-tf">
+            <div class="est-tf-head" style="background:#0A3A2A;">
+              <span>1D · DVA Anual</span><span class="est-badge est-ok">ALCISTA</span>
+            </div>
+            <div class="est-tf-body">
+              <div class="est-tf-price">~114.72</div>
+              Precio sobre VWAP anual (~107). DVA expandida alcista. Nivel macro clave: <strong>119.313</strong>. Tendencia principal intacta.
+            </div>
+          </div>
+          <div class="est-tf">
+            <div class="est-tf-head" style="background:#5B3A0A;">
+              <span>4H · DVA Trimestral</span><span class="est-badge est-warn">BORDE INF.</span>
+            </div>
+            <div class="est-tf-body">
+              <div class="est-tf-price">~114.72</div>
+              Precio tocando borde inferior DVA trimestral (~114.70). DVA en expansión alcista desde Oct 2025. Zona de valor institucional.
+            </div>
+          </div>
+          <div class="est-tf">
+            <div class="est-tf-head" style="background:#1A3A5C;">
+              <span>2H · DVA Mensual</span><span class="est-badge est-warn">PULLBACK</span>
+            </div>
+            <div class="est-tf-body">
+              <div class="est-tf-price">~114.71</div>
+              Ruptura alcista en marzo (113.40→117). Pullback al nivel de ruptura (114.70–115.00). Patrón clásico retest antes de continuación.
+            </div>
+          </div>
+          <div class="est-tf">
+            <div class="est-tf-head" style="background:#6E0A0A;">
+              <span>15min · DVA Semanal</span><span class="est-badge est-danger">FUERA DVA</span>
+            </div>
+            <div class="est-tf-body">
+              <div class="est-tf-price">~114.72</div>
+              Caída vertical. Precio bajo borde inferior DVA semanal hoy. Momentum bajista activo. Sin agotamiento aún en intradía.
+            </div>
+          </div>
+        </div>
+
+        <!-- Zonas clave -->
+        <div class="est-sec-title">Zonas de precio clave (confluencia DVA + Fib)</div>
+        <div class="est-grid4">
+          <div class="est-zona" style="border-color:#DC3545;">
+            <div class="est-zona-title" style="color:#922B21;">Resistencia macro</div>
+            <div class="est-zona-price" style="color:#922B21;">119.313</div>
+            <div class="est-zona-desc">Nivel CONQUER marcado en todos los TF. Objetivo swing si rompe.</div>
+          </div>
+          <div class="est-zona" style="border-color:#E67E22;">
+            <div class="est-zona-title" style="color:#7D5B00;">Zona entrada ⭐</div>
+            <div class="est-zona-price" style="color:#7D5B00;">114.47 – 115.00</div>
+            <div class="est-zona-desc">Borde DVA 4H + retest ruptura 2H + DVAH Mensual + VWAP Trimestral + Fib 50%.</div>
+          </div>
+          <div class="est-zona" style="border-color:#1A7A3A;">
+            <div class="est-zona-title" style="color:#1A5C3A;">Objetivo 1</div>
+            <div class="est-zona-price" style="color:#1A5C3A;">117.00</div>
+            <div class="est-zona-desc">Máximo reciente. RR ~1:2.5 desde entrada 114.80.</div>
+          </div>
+          <div class="est-zona" style="border-color:#1A3A5C;">
+            <div class="est-zona-title" style="color:#1A3A5C;">Objetivo 2 (ext.)</div>
+            <div class="est-zona-price" style="color:#1A3A5C;">119.313</div>
+            <div class="est-zona-desc">Resistencia macro CONQUER. RR ~1:4.5 desde entrada 114.80.</div>
+          </div>
+        </div>
+
+        <!-- Checklist entrada -->
+        <div class="est-sec-title">Checklist entrada — marca conforme se cumplan</div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <!-- Col izq -->
+          <div>
+            <div style="font-size:10px;font-weight:bold;color:#888;margin-bottom:6px;">MARCO + ESTRATEGIA</div>
+            <div class="est-check" onclick="estCheck(this,'ec1')" id="ec1">
+              <div class="est-cb"></div>
+              <div><div class="est-check-main">Tendencia 1D alcista intacta</div><div class="est-check-desc">Precio sobre VWAP anual. DVA expandida arriba.</div></div>
+            </div>
+            <div class="est-check" onclick="estCheck(this,'ec2')" id="ec2">
+              <div class="est-cb"></div>
+              <div><div class="est-check-main">Precio en zona 114.47–115.00</div><div class="est-check-desc">Confluencia: DVA 4H + retest 2H + DVAH Mensual + VWAP Trim.</div></div>
+            </div>
+            <div class="est-check" onclick="estCheck(this,'ec3')" id="ec3">
+              <div class="est-cb"></div>
+              <div><div class="est-check-main">Sin noticias macro críticas</div><div class="est-check-desc">Revisar BoJ, BoC, empleo Canadá, CPI Japón.</div></div>
+            </div>
+            <div class="est-check" onclick="estCheck(this,'ec4')" id="ec4">
+              <div class="est-cb"></div>
+              <div><div class="est-check-main">Vela reversión 1H / 15min</div><div class="est-check-desc">Martillo, pin bar o envolvente alcista dentro de zona.</div></div>
+            </div>
+            <div class="est-check" onclick="estCheck(this,'ec5')" id="ec5">
+              <div class="est-cb"></div>
+              <div><div class="est-check-main">MACD histograma reduciendo (1H)</div><div class="est-check-desc">Barras rojas más pequeñas = agotamiento bajista.</div></div>
+            </div>
+            <div class="est-check" onclick="estCheck(this,'ec6')" id="ec6">
+              <div class="est-cb"></div>
+              <div><div class="est-check-main">Precio no cerró bajo 114.47</div><div class="est-check-desc">Si rompe → zona inválida. Esperar siguiente soporte.</div></div>
+            </div>
+          </div>
+          <!-- Col der -->
+          <div>
+            <div style="font-size:10px;font-weight:bold;color:#888;margin-bottom:6px;">FLUJO Fi + GESTIÓN</div>
+            <div class="est-check" onclick="estCheck(this,'ec7')" id="ec7">
+              <div class="est-cb"></div>
+              <div><div class="est-check-main">JPY bajando de +30 (Fi)</div><div class="est-check-desc">Estaba en +50. Normalizar a &lt;+15 reduce presión bajista.</div></div>
+            </div>
+            <div class="est-check" onclick="estCheck(this,'ec8')" id="ec8">
+              <div class="est-cb"></div>
+              <div><div class="est-check-main">CAD girando a positivo/neutral (Fi)</div><div class="est-check-desc">Salir de zona muy negativa es suficiente.</div></div>
+            </div>
+            <div class="est-check" onclick="estCheck(this,'ec9')" id="ec9">
+              <div class="est-cb"></div>
+              <div><div class="est-check-main">Flujo Fi no contradice el largo</div><div class="est-check-desc">Línea CADJPY compuesta girando o subiendo.</div></div>
+            </div>
+            <div class="est-check" onclick="estCheck(this,'ec10')" id="ec10">
+              <div class="est-cb"></div>
+              <div><div class="est-check-main">R:R mínimo 1:2 verificado</div><div class="est-check-desc">Con stop 113.84 y entrada ~114.80 → obj. mín. 116.76.</div></div>
+            </div>
+            <div class="est-check" onclick="estCheck(this,'ec11')" id="ec11">
+              <div class="est-cb"></div>
+              <div><div class="est-check-main">Lotes calculados y anotados</div><div class="est-check-desc">Usar calculadora abajo. Anotar lotes, stop exacto y objetivos.</div></div>
+            </div>
+            <div class="est-check" onclick="estCheck(this,'ec12')" id="ec12">
+              <div class="est-cb"></div>
+              <div><div class="est-check-main">Stop puesto en plataforma al entrar</div><div class="est-check-desc">No stop mental. Poner la orden inmediatamente tras ejecución.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progreso y veredicto -->
+        <div style="margin-top:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:#888;margin-bottom:3px;">
+            <span>Condiciones cumplidas</span><span id="est-count">0 / 12</span>
+          </div>
+          <div class="est-prog"><div class="est-prog-fill" id="est-prog-fill" style="width:0%"></div></div>
+        </div>
+        <div class="est-verdict nogo" id="est-verdict">⛔ NO OPERAR AÚN — Marca las condiciones conforme se cumplan</div>
+
+        <!-- Tabla sizing referencia -->
+        <div class="est-sec-title" style="margin-top:14px;">Sizing de referencia — cuenta $5.000 · pip CADJPY ≈ $0.91/lote</div>
+        <table class="est-tabla">
+          <thead>
+            <tr><th>Riesgo %</th><th>Riesgo $</th><th>Entrada</th><th>Stop</th><th>Pips SL</th><th>Lotes</th><th>Ben. obj.1 (117.00)</th><th>R:R</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>0.5%</td><td>$25</td><td>115.00</td><td>113.84</td><td>116</td><td>0.24</td><td class="est-ok" style="color:#1A7A3A;">+$44</td><td>1:1.7</td></tr>
+            <tr><td>1.0%</td><td>$50</td><td>115.00</td><td>113.84</td><td>116</td><td>0.47</td><td class="est-ok" style="color:#1A7A3A;">+$87</td><td>1:1.7</td></tr>
+            <tr><td>1.5%</td><td>$75</td><td>115.00</td><td>113.84</td><td>116</td><td>0.71</td><td class="est-ok" style="color:#1A7A3A;">+$131</td><td>1:1.7</td></tr>
+            <tr class="est-resalt"><td>0.5%</td><td>$25</td><td>114.80</td><td>113.84</td><td>96</td><td>0.29</td><td class="est-ok" style="color:#1A7A3A;">+$57</td><td>1:2.3</td></tr>
+            <tr class="est-resalt"><td>1.0%</td><td>$50</td><td>114.80</td><td>113.84</td><td>96</td><td>0.57</td><td class="est-ok" style="color:#1A7A3A;">+$114</td><td>1:2.3</td></tr>
+            <tr class="est-resalt"><td>1.5%</td><td>$75</td><td>114.80</td><td>113.84</td><td>96</td><td>0.86</td><td class="est-ok" style="color:#1A7A3A;">+$172</td><td>1:2.3</td></tr>
+            <tr><td>1.0%</td><td>$50</td><td>114.80</td><td>113.60</td><td>120</td><td>0.46</td><td class="est-ok" style="color:#1A7A3A;">+$91</td><td>1:1.8</td></tr>
+            <tr><td>1.0%</td><td>$50</td><td>114.80</td><td>113.40</td><td>140</td><td>0.39</td><td class="est-ok" style="color:#1A7A3A;">+$78</td><td>1:1.6</td></tr>
+          </tbody>
+        </table>
+        <div style="font-size:10px;color:#888;margin-top:6px;">Filas azules = escenario óptimo (entrada 114.80, stop Fib 61.8%). Verifica el valor pip exacto en FXCM antes de ejecutar.</div>
+
+        <!-- Notas invalidación -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+          <div style="background:#FEF0F0;border:1px solid #DC3545;border-radius:8px;padding:10px 12px;">
+            <div style="font-size:10px;font-weight:bold;color:#922B21;margin-bottom:4px;">❌ INVALIDACIÓN TOTAL</div>
+            <div style="font-size:11px;color:#555;line-height:1.6;">Cierre 4H bajo <strong>113.84</strong> → descartar largo completamente.<br>BoJ hawkish agresivo o subida tipos = JPY se fortalece.<br>Fi JPY sostenido sobre +30 varios días.</div>
+          </div>
+          <div style="background:#F0FFF4;border:1px solid #1A7A3A;border-radius:8px;padding:10px 12px;">
+            <div style="font-size:10px;font-weight:bold;color:#1A5C3A;margin-bottom:4px;">✅ CONTEXTO FAVORABLE</div>
+            <div style="font-size:11px;color:#555;line-height:1.6;">Carry trade: CAD tipo &gt; JPY tipo → interés diario positivo en largo.<br>Oil fuerte → bueno para CAD, malo para JPY importador.<br>Estructura diaria alcista intacta desde mín. 111.78.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla PRAC -->
+  <div class="card">
+    <div class="card-body" style="padding:0;">
+      <table class="prac-table">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding-left:16px; width:18%;">DVA</th>
+            <th style="width:18%;">P — Previa</th>
+            <th style="width:22%;">A — Aceptación</th>
+            <th style="width:18%;">C — Condición</th>
+            <th style="width:14%;">Dirección</th>
+            <th style="width:10%;">Ritmo (T)</th>
+          </tr>
+        </thead>
+        <tbody id="prac-body">
+          <tr>
+            <td><span class="dva-y">Anual (Y-DVA)</span></td>
+            <td><input class="td-inp" placeholder="Rot./Imb. alc/baj"/></td>
+            <td><input class="td-inp" placeholder="Dentro/Fuera · nivel"/></td>
+            <td><select class="cond-sel" onchange="colorCond(this)"><option value="">— —</option><option value="rot">Rotacional</option><option value="imb">Imbalance</option></select></td>
+            <td><select class="dir-sel" onchange="colorDir(this)"><option value="">— —</option><option value="n">Neutral</option><option value="a">↑ Alcista</option><option value="b">⬇ Bajista</option></select></td>
+            <td><input class="td-inp" placeholder="T1/T2/T3"/></td>
+          </tr>
+          <tr>
+            <td><span class="dva-q">Trimestral (Q-DVA)</span></td>
+            <td><input class="td-inp" placeholder="Rot./Imb. alc/baj"/></td>
+            <td><input class="td-inp" placeholder="Dentro/Fuera · nivel"/></td>
+            <td><select class="cond-sel" onchange="colorCond(this)"><option value="">— —</option><option value="rot">Rotacional</option><option value="imb">Imbalance</option></select></td>
+            <td><select class="dir-sel" onchange="colorDir(this)"><option value="">— —</option><option value="n">Neutral</option><option value="a">↑ Alcista</option><option value="b">⬇ Bajista</option></select></td>
+            <td><input class="td-inp" placeholder="T1/T2/T3"/></td>
+          </tr>
+          <tr>
+            <td><span class="dva-m">Mensual (M-DVA)</span></td>
+            <td><input class="td-inp" placeholder="Rot./Imb. alc/baj"/></td>
+            <td><input class="td-inp" placeholder="Dentro/Fuera · nivel"/></td>
+            <td><select class="cond-sel" onchange="colorCond(this)"><option value="">— —</option><option value="rot">Rotacional</option><option value="imb">Imbalance</option></select></td>
+            <td><select class="dir-sel" onchange="colorDir(this)"><option value="">— —</option><option value="n">Neutral</option><option value="a">↑ Alcista</option><option value="b">⬇ Bajista</option></select></td>
+            <td><input class="td-inp" placeholder="T1/T2/T3"/></td>
+          </tr>
+          <tr>
+            <td><span class="dva-w">Semanal (W-DVA)</span></td>
+            <td><input class="td-inp" placeholder="Rot./Imb. alc/baj"/></td>
+            <td><input class="td-inp" placeholder="Dentro/Fuera · nivel"/></td>
+            <td><select class="cond-sel" onchange="colorCond(this)"><option value="">— —</option><option value="rot">Rotacional</option><option value="imb">Imbalance</option></select></td>
+            <td><select class="dir-sel" onchange="colorDir(this)"><option value="">— —</option><option value="n">Neutral</option><option value="a">↑ Alcista</option><option value="b">⬇ Bajista</option></select></td>
+            <td><input class="td-inp" placeholder="T1/T2/T3"/></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Escenario -->
+  <div class="card">
+    <div class="card-body">
+      <div class="esc-box">
+        <input id="escenario-tipo" class="esc-inp" placeholder="Escenario: FA / CAT / CMP / MM — descripción breve"/>
+        <textarea id="escenario-desc" class="esc-ta" placeholder="Resumen: qué DVAs están alineadas · narrativa · calidad operativa del día"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Noticias -->
+  <div class="card">
+    <div class="card-header news-header">📰 Noticias del día — Forex Factory</div>
+    <div class="card-body" style="padding:12px 18px;">
+      <table class="news-table" id="news-table">
+        <thead>
+          <tr>
+            <th style="width:10%;">Hora</th>
+            <th style="width:22%;">Indicador</th>
+            <th style="width:9%;">Impacto</th>
+            <th style="width:13%;">Anterior</th>
+            <th style="width:13%;">Previsión</th>
+            <th style="width:12%;">Afecta a</th>
+            <th>Acción / Nota</th>
+          </tr>
+        </thead>
+        <tbody id="news-body">
+          <tr>
+            <td><input class="news-inp" placeholder="08:30h"/></td>
+            <td><input class="news-inp" placeholder="Indicador"/></td>
+            <td><select class="imp-sel" onchange="colorImp(this)"><option value="">—</option><option value="r">🔴 Alto</option><option value="y">🟡 Medio</option><option value="g">🟢 Bajo</option></select></td>
+            <td><input class="news-inp" placeholder="—"/></td>
+            <td><input class="news-inp" placeholder="—"/></td>
+            <td><input class="news-inp" placeholder="USD/EUR…"/></td>
+            <td><input class="news-inp" placeholder="Evitar 15 min antes/después · o nota"/></td>
+          </tr>
+          <tr>
+            <td><input class="news-inp" placeholder="08:30h"/></td>
+            <td><input class="news-inp" placeholder="Indicador"/></td>
+            <td><select class="imp-sel" onchange="colorImp(this)"><option value="">—</option><option value="r">🔴 Alto</option><option value="y">🟡 Medio</option><option value="g">🟢 Bajo</option></select></td>
+            <td><input class="news-inp" placeholder="—"/></td>
+            <td><input class="news-inp" placeholder="—"/></td>
+            <td><input class="news-inp" placeholder="USD/EUR…"/></td>
+            <td><input class="news-inp" placeholder="Nota"/></td>
+          </tr>
+        </tbody>
+      </table>
+      <button class="add-row-btn" onclick="addNewsRow()">+ Añadir noticia</button>
+    </div>
+  </div>
+
+  <!-- Calculadora RR + Lotes -->
+  <div class="card">
+    <div class="card-header calc-header">🧮 Calculadora — RR automático + Lotes por riesgo</div>
+    <div class="card-body">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+
+        <!-- Calculadora RR -->
+        <div>
+          <div style="font-size:11px; font-weight:bold; color:#8A5500; margin-bottom:10px; text-transform:uppercase;">Ratio Riesgo/Beneficio (RR)</div>
+          <div class="calc-grid" style="grid-template-columns:1fr 1fr 1fr;">
+            <div class="calc-group">
+              <label>Entrada</label>
+              <input class="calc-inp input-azul" id="c-entrada" type="number" step="0.00001" placeholder="0.5900" oninput="calcRR()"/>
+              <span class="calc-nota">AP donde entras</span>
+            </div>
+            <div class="calc-group">
+              <label>Stop Loss</label>
+              <input class="calc-inp" id="c-sl" type="number" step="0.00001" placeholder="0.5920" style="border-color:#DC3545;" oninput="calcRR()"/>
+              <span class="calc-nota">Nivel inválido</span>
+            </div>
+            <div class="calc-group">
+              <label>Take Profit</label>
+              <input class="calc-inp" id="c-tp" type="number" step="0.00001" placeholder="0.5774" style="border-color:#1A7A3A;" oninput="calcRR()"/>
+              <span class="calc-nota">AP destino</span>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:10px;">
+            <div class="calc-group">
+              <label>Pips SL (1R)</label>
+              <div class="calc-result" id="r-pipssl">—</div>
+            </div>
+            <div class="calc-group">
+              <label>Pips TP</label>
+              <div class="calc-result" id="r-pipstp">—</div>
+            </div>
+            <div class="calc-group">
+              <label>RR ratio</label>
+              <div class="calc-result" id="r-rr">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calculadora Lotes -->
+        <div>
+          <div style="font-size:11px; font-weight:bold; color:#1A3A5C; margin-bottom:10px; text-transform:uppercase;">Tamaño de posición (Lotes)</div>
+          <div class="calc-grid" style="grid-template-columns:1fr 1fr;">
+            <div class="calc-group">
+              <label>Balance cuenta ($)</label>
+              <input class="calc-inp input-azul" id="c-balance" type="number" placeholder="5000" oninput="calcLotes()"/>
+              <span class="calc-nota">TTP 5k = 5000</span>
+            </div>
+            <div class="calc-group">
+              <label>DLL del día ($)</label>
+              <input class="calc-inp input-azul" id="c-dll" type="number" placeholder="50" oninput="calcLotes()"/>
+              <span class="calc-nota">Pérdida máx día</span>
+            </div>
+            <div class="calc-group">
+              <label>Nº ejecuciones</label>
+              <input class="calc-inp input-azul" id="c-exec" type="number" placeholder="2" oninput="calcLotes()"/>
+              <span class="calc-nota">Entradas por idea</span>
+            </div>
+            <div class="calc-group">
+              <label>Valor pip (CFD)</label>
+              <input class="calc-inp input-azul" id="c-pip" type="number" step="0.01" placeholder="0.10" oninput="calcLotes()"/>
+              <span class="calc-nota">$ por pip a 0.01 lotes</span>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;">
+            <div class="calc-group">
+              <label>R por trade ($)</label>
+              <div class="calc-result" id="r-rdolar">—</div>
+            </div>
+            <div class="calc-group">
+              <label>Lotes recomendados</label>
+              <div class="calc-result verde" id="r-lotes">—</div>
+            </div>
+          </div>
+          <div style="margin-top:8px; background:#F0F4FF; border-radius:6px; padding:8px 10px; font-size:10px; color:#1A3A5C;" id="r-resumen">
+            Rellena los campos para ver el resumen.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Hipótesis -->
+  <div class="card">
+    <div class="card-header hip-header-card" style="justify-content:center;">Las 3 Hipótesis — de Área Pivote a Área Pivote</div>
+    <div class="card-body">
+      <div class="hip-sub">Cada hipótesis va desde una AP de entrada hasta una AP de destino. Siempre tienes que definir las dos. RR mínimo: 2R.</div>
+
+      <!-- H1 -->
+      <div class="hip-box hip-h1">
+        <div class="hip-row">
+          <span class="hip-num">H1 —</span>
+          <select class="hip-sel" id="h1-cal" onchange="colorHipSel(this,'cal')"><option value="">Calidad</option><option value="A">Calidad A</option><option value="B">Calidad B</option><option value="C">Calidad C</option></select>
+          <select class="hip-sel" id="h1-dir" onchange="colorHipSel(this,'dir')"><option value="">Dirección</option><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select>
+          <span id="h1-rr-badge" class="rr-badge rr-neu" style="display:none;"></span>
+        </div>
+        <div class="hip-campos">
+          <div class="hip-campo hip-campo-full">
+            <label>Por qué — narrativa y alineación de DVAs</label>
+            <textarea rows="2" id="h1-why" placeholder="Ej: Q+M bajistas alineados → rebote semanal es oportunidad de venta · calidad alta porque 2 temporalidades confluyen"></textarea>
+          </div>
+          <div class="hip-campo">
+            <label>Entrada (AP)</label>
+            <input id="h1-entrada" type="number" step="0.00001" placeholder="0.5900" oninput="calcHipRR('h1')"/>
+          </div>
+          <div class="hip-campo">
+            <label>Destino (AP)</label>
+            <input id="h1-tp" type="number" step="0.00001" placeholder="0.5774" oninput="calcHipRR('h1')"/>
+          </div>
+          <div class="hip-campo">
+            <label>SL — dónde invalida</label>
+            <input id="h1-sl" type="number" step="0.00001" placeholder="0.5920" oninput="calcHipRR('h1')"/>
+          </div>
+          <div class="hip-campo">
+            <label>Condición necesaria</label>
+            <input id="h1-cond" placeholder="FCS + T3 + vela bajista HA"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- H2 -->
+      <div class="hip-box hip-h2">
+        <div class="hip-row">
+          <span class="hip-num">H2 —</span>
+          <select class="hip-sel" id="h2-cal" onchange="colorHipSel(this,'cal')"><option value="">Calidad</option><option value="A">Calidad A</option><option value="B">Calidad B</option><option value="C">Calidad C</option></select>
+          <select class="hip-sel" id="h2-dir" onchange="colorHipSel(this,'dir')"><option value="">Dirección</option><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select>
+          <span id="h2-rr-badge" class="rr-badge rr-neu" style="display:none;"></span>
+        </div>
+        <div class="hip-campos">
+          <div class="hip-campo hip-campo-full">
+            <label>Por qué — narrativa y alineación de DVAs</label>
+            <textarea rows="2" id="h2-why" placeholder="Ej: W rotacional alcista desde W-DVAL · calidad B porque va contra sesgo LP"></textarea>
+          </div>
+          <div class="hip-campo">
+            <label>Entrada (AP)</label>
+            <input id="h2-entrada" type="number" step="0.00001" placeholder="0.5840" oninput="calcHipRR('h2')"/>
+          </div>
+          <div class="hip-campo">
+            <label>Destino (AP)</label>
+            <input id="h2-tp" type="number" step="0.00001" placeholder="0.5900" oninput="calcHipRR('h2')"/>
+          </div>
+          <div class="hip-campo">
+            <label>SL — dónde invalida</label>
+            <input id="h2-sl" type="number" step="0.00001" placeholder="0.5810" oninput="calcHipRR('h2')"/>
+          </div>
+          <div class="hip-campo">
+            <label>Condición necesaria</label>
+            <input id="h2-cond" placeholder="FCS alcista + delta positivo + HA alcista"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- H3 -->
+      <div class="hip-box hip-h3">
+        <div class="hip-row">
+          <span class="hip-num">H3 —</span>
+          <select class="hip-sel" id="h3-cal" onchange="colorHipSel(this,'cal')"><option value="">Calidad</option><option value="A">Calidad A</option><option value="B">Calidad B</option><option value="C">Calidad C</option></select>
+          <select class="hip-sel" id="h3-dir" onchange="colorHipSel(this,'dir')"><option value="">Dirección</option><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select>
+          <span id="h3-rr-badge" class="rr-badge rr-neu" style="display:none;"></span>
+        </div>
+        <div class="hip-campos">
+          <div class="hip-campo hip-campo-full">
+            <label>Por qué — condición necesaria para activarse</label>
+            <textarea rows="2" id="h3-why" placeholder="Ej: H3 se activa si H2 falla en W-DVAH · RPB bajista desde resistencia"></textarea>
+          </div>
+          <div class="hip-campo">
+            <label>Entrada (AP)</label>
+            <input id="h3-entrada" type="number" step="0.00001" placeholder="0.5900" oninput="calcHipRR('h3')"/>
+          </div>
+          <div class="hip-campo">
+            <label>Destino (AP)</label>
+            <input id="h3-tp" type="number" step="0.00001" placeholder="0.5840" oninput="calcHipRR('h3')"/>
+          </div>
+          <div class="hip-campo">
+            <label>SL — dónde invalida</label>
+            <input id="h3-sl" type="number" step="0.00001" placeholder="0.5920" oninput="calcHipRR('h3')"/>
+          </div>
+          <div class="hip-campo">
+            <label>Condición necesaria</label>
+            <input id="h3-cond" placeholder="FCS bajista + T3 confirmado + HA bajista"/>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Review post-sesión -->
+  <div class="card">
+    <div class="card-header review-header">✅ Chequeo emocional + Review post-sesión</div>
+    <div class="card-body">
+      <div class="review-grid">
+
+        <div class="rev-campo rev-full">
+          <label>Estado emocional antes de operar</label>
+          <div class="emoji-row" id="emoji-row">
+            <button class="emoji-btn" onclick="selectEmoji(this)">😌 Tranquilo</button>
+            <button class="emoji-btn" onclick="selectEmoji(this)">😎 Confiado</button>
+            <button class="emoji-btn" onclick="selectEmoji(this)">😰 Ansioso</button>
+            <button class="emoji-btn" onclick="selectEmoji(this)">😤 Frustrado</button>
+            <button class="emoji-btn" onclick="selectEmoji(this)">😴 Cansado</button>
+            <button class="emoji-btn" onclick="selectEmoji(this)">🤯 Sobreestimulado</button>
+          </div>
+        </div>
+
+        <div class="rev-campo">
+          <label>¿SL puesto ANTES de entrar?</label>
+          <div class="yn-row">
+            <button class="yn-btn" onclick="selectYN(this,'sl-yn','yes')">✅ SÍ</button>
+            <button class="yn-btn" onclick="selectYN(this,'sl-yn','no')">❌ NO</button>
+          </div>
+          <input type="hidden" id="sl-yn" value=""/>
+        </div>
+
+        <div class="rev-campo">
+          <label>¿Seguí las hipótesis del plan?</label>
+          <div class="yn-row">
+            <button class="yn-btn" onclick="selectYN(this,'plan-yn','yes')">✅ SÍ</button>
+            <button class="yn-btn" onclick="selectYN(this,'plan-yn','no')">❌ NO</button>
+          </div>
+          <input type="hidden" id="plan-yn" value=""/>
+        </div>
+
+        <div class="rev-campo">
+          <label>¿Revenge trading?</label>
+          <div class="yn-row">
+            <button class="yn-btn" onclick="selectYN(this,'revenge-yn','yes')">✅ SÍ</button>
+            <button class="yn-btn" onclick="selectYN(this,'revenge-yn','no')">❌ NO</button>
+          </div>
+          <input type="hidden" id="revenge-yn" value=""/>
+        </div>
+
+        <div class="rev-campo">
+          <label>¿Respeté el DLL?</label>
+          <div class="yn-row">
+            <button class="yn-btn" onclick="selectYN(this,'dll-yn','yes')">✅ SÍ</button>
+            <button class="yn-btn" onclick="selectYN(this,'dll-yn','no')">❌ NO</button>
+          </div>
+          <input type="hidden" id="dll-yn" value=""/>
+        </div>
+
+        <div class="rev-campo">
+          <label>¿Respeté regla 40% TTP?</label>
+          <div class="yn-row">
+            <button class="yn-btn" onclick="selectYN(this,'ttp-yn','yes')">✅ SÍ</button>
+            <button class="yn-btn" onclick="selectYN(this,'ttp-yn','no')">❌ NO</button>
+          </div>
+          <input type="hidden" id="ttp-yn" value=""/>
+        </div>
+
+        <div class="rev-campo">
+          <label>P&L real del día ($)</label>
+          <input class="rev-inp" id="rev-pnl" type="number" step="0.01" placeholder="ej: +45.00 ó -25.00"/>
+        </div>
+
+        <div class="rev-campo">
+          <label>Hipótesis que se activó</label>
+          <input class="rev-inp" id="rev-hip" placeholder="H1 / H2 / H3 / Ninguna"/>
+        </div>
+
+        <div class="rev-campo rev-full">
+          <label>Lección principal del día</label>
+          <textarea class="rev-ta" id="rev-leccion" placeholder="¿Qué aprendiste hoy? ¿Qué harías diferente? ¿Dónde estuvo el error o el acierto?"></textarea>
+        </div>
+
+        <div class="rev-campo rev-full">
+          <label>Objetivo para mañana</label>
+          <textarea class="rev-ta" id="rev-objetivo" placeholder="¿Qué proceso quieres mejorar mañana? ¿Qué setup vas a buscar?"></textarea>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Regla final -->
+  <div class="regla-box">
+    <strong>La regla que une todo</strong>
+    <p>Cada hipótesis tiene una AP de ENTRADA y una AP de DESTINO — si no tienes las dos, no es una hipótesis válida</p>
+    <p style="color:#922B21; font-weight:bold; margin-top:4px;">RR mínimo 2R · Sin SL no hay trade · DLL como límite absoluto del día</p>
+  </div>
+
+</div><!-- /vista-prac -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<div class="toast" id="toast"></div>
+<input type="file" id="file-import" accept=".json" style="display:none" onchange="importarArchivo(event)"/>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+
+// ── VISTAS ──
+function setVista(v) {
+  document.getElementById('vista-prac').classList.toggle('active', v==='prac');
+  document.getElementById('vista-dash').classList.toggle('active', v==='dash');
+  document.getElementById('btn-vista-prac').classList.toggle('active', v==='prac');
+  document.getElementById('btn-vista-dash').classList.toggle('active', v==='dash');
+  if (v==='dash') renderDashboard();
+}
+
+// ── ALERTAS ──
+let alertaCount = 6;
+function toggleAlerta(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('done');
+  const done = document.querySelectorAll('.alerta-item.done').length;
+  const total = document.querySelectorAll('.alerta-item').length;
+  toast('🔔 Alertas: ' + done + '/' + total + ' completadas');
+}
+function addAlerta() {
+  const txt = document.getElementById('alerta-nueva-txt').value.trim();
+  const tipo = document.getElementById('alerta-nueva-tipo').value;
+  if (!txt) return;
+  const id = 'al' + alertaCount++;
+  const tipoLabel = {al_precio:'Precio','al-precio':'Precio','al-fi':'Fi','al-macro':'Macro','al-ok':'Técnico'}[tipo] || tipo;
+  const div = document.createElement('div');
+  div.className = 'alerta-item'; div.id = id;
+  div.innerHTML = `<div class="alerta-cb" onclick="toggleAlerta('${id}')"></div>
+    <div class="alerta-texto">
+      <div class="alerta-titulo">${txt} <span class="alerta-badge ${tipo}">${tipoLabel}</span></div>
+    </div>`;
+  document.getElementById('alertas-lista').appendChild(div);
+  document.getElementById('alerta-nueva-txt').value = '';
+  toast('🔔 Alerta añadida');
+}
+
+// ── DASHBOARD ──
+let graficoCuenta = null;
+function renderDashboard() {
+  const todos = getTodos().filter(p => p.review && p.review.pnl && p.review.pnl !== '');
+  const pnls  = todos.map(p => parseFloat(p.review.pnl) || 0);
+  const wins  = pnls.filter(x => x > 0).length;
+  const total = pnls.length;
+  const pnlTotal = pnls.reduce((a,b) => a+b, 0);
+  const winrate  = total > 0 ? Math.round(wins/total*100) : 0;
+
+  // RR aproximado (pnl / $50 riesgo medio)
+  const riesgoMedio = 50;
+  const rTotal = pnlTotal / riesgoMedio;
+  const expect = total > 0 ? (rTotal / total).toFixed(2) : '—';
+
+  // Racha actual
+  let racha = 0, rachaDir = '';
+  for (let i = todos.length-1; i >= 0; i--) {
+    const v = parseFloat(todos[i].review.pnl) || 0;
+    if (i === todos.length-1) { rachaDir = v >= 0 ? 'win' : 'loss'; }
+    if ((rachaDir==='win' && v >= 0) || (rachaDir==='loss' && v < 0)) racha++;
+    else break;
+  }
+
+  // KPIs
+  const wr = document.getElementById('d-winrate');
+  wr.textContent = total > 0 ? winrate + '%' : '—';
+  wr.style.color = winrate >= 50 ? '#1A7A3A' : '#DC3545';
+  document.getElementById('d-wrsub').textContent = total + ' trades con PnL';
+  const rg = document.getElementById('d-rganado');
+  rg.textContent = total > 0 ? (rTotal >= 0 ? '+' : '') + rTotal.toFixed(1) + 'R' : '—';
+  rg.style.color = rTotal >= 0 ? '#1A7A3A' : '#DC3545';
+  document.getElementById('d-pnltotal').textContent = (pnlTotal >= 0 ? '+$' : '-$') + Math.abs(pnlTotal).toFixed(2);
+  document.getElementById('d-expectativa').textContent = total > 0 ? (expect >= 0 ? '+' : '') + expect + 'R' : '—';
+  document.getElementById('d-expectativa').style.color = expect >= 0 ? '#1A7A3A' : '#DC3545';
+  const rd = document.getElementById('d-racha');
+  rd.textContent = racha > 0 ? racha + (rachaDir==='win' ? ' ✅' : ' ❌') : '—';
+  rd.style.color = rachaDir==='win' ? '#1A7A3A' : '#DC3545';
+  document.getElementById('d-rachasub').textContent = rachaDir === 'win' ? 'wins seguidos' : rachaDir === 'loss' ? 'losses seguidos' : '';
+
+  // Gráfico evolución cuenta
+  const base = 5000;
+  let saldo = base;
+  const labels = ['Inicio'];
+  const data   = [base];
+  todos.forEach(p => {
+    saldo += parseFloat(p.review.pnl) || 0;
+    labels.push(p.par + ' ' + (p.fecha||'').slice(0,5));
+    data.push(parseFloat(saldo.toFixed(2)));
+  });
+  const ctx = document.getElementById('grafico-cuenta').getContext('2d');
+  if (graficoCuenta) graficoCuenta.destroy();
+  graficoCuenta = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Saldo cuenta ($)',
+        data,
+        borderColor: '#4A235A',
+        backgroundColor: 'rgba(74,35,90,0.08)',
+        borderWidth: 2,
+        pointBackgroundColor: data.map((v,i) => i===0 ? '#888' : v >= data[i-1] ? '#1A7A3A' : '#DC3545'),
+        pointRadius: 5,
+        tension: 0.3,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: { callbacks: {
+        label: ctx => '$' + ctx.parsed.y.toFixed(2)
+      }}},
+      scales: {
+        y: { ticks: { callback: v => '$' + v }, grid: { color: '#F0F0F0' } },
+        x: { ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+
+  // Por escenario
+  const escMap = {};
+  getTodos().forEach(p => {
+    const esc = (p.escTipo||'Otro').split(' ')[0].split('-')[0].trim();
+    if (!escMap[esc]) escMap[esc] = {w:0,l:0};
+    const pnl = parseFloat((p.review||{}).pnl);
+    if (!isNaN(pnl)) { if (pnl>0) escMap[esc].w++; else escMap[esc].l++; }
+  });
+  document.getElementById('dash-por-esc').innerHTML = Object.entries(escMap).map(([k,v]) => {
+    const t = v.w+v.l; const wr = t>0 ? Math.round(v.w/t*100) : 0;
+    return `<div class="dash-bar-row"><div class="dash-bar-lbl">${k}</div>
+      <div class="dash-bar-track"><div class="dash-bar-fill" style="width:${wr}%;background:${wr>=50?'#1A7A3A':'#DC3545'}"></div></div>
+      <div class="dash-bar-val" style="color:${wr>=50?'#1A7A3A':'#DC3545'}">${wr}%</div></div>`;
+  }).join('') || '<div style="font-size:11px;color:#AAA;padding:8px 0;">Sin datos suficientes</div>';
+
+  // Por par
+  const parMap = {};
+  getTodos().forEach(p => {
+    const par = p.par||'?';
+    if (!parMap[par]) parMap[par] = {w:0,l:0};
+    const pnl = parseFloat((p.review||{}).pnl);
+    if (!isNaN(pnl)) { if (pnl>0) parMap[par].w++; else parMap[par].l++; }
+  });
+  document.getElementById('dash-por-par').innerHTML = Object.entries(parMap).map(([k,v]) => {
+    const t = v.w+v.l; const wr = t>0 ? Math.round(v.w/t*100) : 0;
+    return `<div class="dash-bar-row"><div class="dash-bar-lbl">${k}</div>
+      <div class="dash-bar-track"><div class="dash-bar-fill" style="width:${wr}%;background:${wr>=50?'#4A235A':'#DC3545'}"></div></div>
+      <div class="dash-bar-val" style="color:${wr>=50?'#4A235A':'#DC3545'}">${wr}%</div></div>`;
+  }).join('') || '<div style="font-size:11px;color:#AAA;padding:8px 0;">Sin datos suficientes</div>';
+
+  // Streak dots
+  document.getElementById('dash-streak').innerHTML = todos.slice(-15).map(p => {
+    const v = parseFloat(p.review.pnl)||0;
+    const ok = v >= 0;
+    return `<div class="dash-streak-dot" title="${p.par} ${p.review.pnl}" style="background:${ok?'#1A7A3A':'#DC3545'}">${ok?'W':'L'}</div>`;
+  }).join('') || '<span style="font-size:11px;color:#AAA;">Sin trades con PnL registrado</span>';
+
+  // Tabla recientes
+  document.getElementById('dash-tabla-rec').innerHTML = getTodos().slice(-5).reverse().map(p => {
+    const pnl = parseFloat((p.review||{}).pnl);
+    const col = isNaN(pnl) ? '#AAA' : pnl >= 0 ? '#1A7A3A' : '#DC3545';
+    return `<tr><td><b>${p.par||'—'}</b></td><td>${p.fecha||'—'}</td><td>${(p.review||{}).hip||'—'}</td>
+      <td style="color:${col};font-weight:bold">${isNaN(pnl)?'—':(pnl>=0?'+':'')+pnl.toFixed(2)}</td></tr>`;
+  }).join('');
+}
+
+
+const EJEMPLOS = [
+  {
+    id:1001, par:"NZDUSD", fecha:"25/03/2026", precio:"0.5822",
+    prac:[
+      {previa:"Rot. neutral",       acep:"Dentro - en Y-VWAP ~0.5850",    cond:"rot", dir:"n", ritmo:"T2"},
+      {previa:"Imb. Bajista",       acep:"Dentro - bajo Q-VWAP ~0.5950",  cond:"rot", dir:"b", ritmo:"T2"},
+      {previa:"Imb. Bajista",       acep:"Fuera - bajo M-DVAL ~0.5919",   cond:"imb", dir:"b", ritmo:"T3"},
+      {previa:"Imb. Bajista prev.", acep:"Dentro - cerca W-VWAP ~0.5840", cond:"rot", dir:"a", ritmo:"T3"}
+    ],
+    noticias:[
+      {hora:"00:45h NZ", ind:"NZD Trade Balance (Feb)", imp:"r", ant:"-1.28B",     prev:"-1.28B",     afecta:"NZD",          accion:"Evitar 15min antes/despues"},
+      {hora:"Continuo",  ind:"Conflicto Iran - Risk Off",imp:"y", ant:"USD fuerte", prev:"USD fuerte", afecta:"NZD bajista",  accion:"Sesgo LP contra NZD"}
+    ],
+    escTipo:"CMP - Conflicto en Medio Plazo",
+    escDesc:"Y neutral Q+M bajistas W rotacional alcista (rebote desde W-DVAL). Cortos de calidad A cuando el rebote falle en W-DVAH ~0.5900. Sesgo macro: conflicto Iran favorece USD.",
+    calc:{entrada:"0.59000",sl:"0.59200",tp:"0.57740",balance:"5000",dll:"50",exec:"2",pip:"0.10"},
+    hips:[
+      {cal:"A",dir:"SHORT",why:"Q+M bajistas alineados. Rebote semanal es oportunidad de venta. Calidad A por alineacion macro+tecnica.",
+       entrada:"0.59000",tp:"0.57740",sl:"0.59200",cond:"Pullback a W-DVAH + FCS bajista + T3 + vela HA bajista"},
+      {cal:"B",dir:"LONG", why:"W rotacional alcista desde W-DVAL. Calidad B vs sesgo Q+M bajistas. Solo si dato NZD Trade Balance positivo.",
+       entrada:"0.58400",tp:"0.59000",sl:"0.58100",cond:"FCS alcista en W-VWAP + delta positivo + vela HA alcista"},
+      {cal:"B",dir:"SHORT",why:"H3 activa si H2 falla en W-DVAH. RPB bajista de continuacion desde resistencia semanal.",
+       entrada:"0.59000",tp:"0.58400",sl:"0.59200",cond:"Rechazo en W-DVAH + FCS bajista + T3 en resistencia"}
+    ],
+    review:{emocion:"😌 Tranquilo",slYN:"yes",planYN:"yes",revengeYN:"no",dllYN:"yes",ttpYN:"yes",
+            pnl:"+32.50",hip:"H2",
+            leccion:"H2 se activo. Dato NZD Trade Balance mejor de lo esperado. Espere el FCS alcista antes de entrar. Eso marco la diferencia.",
+            objetivo:"Aplicar el mismo proceso de espera en W-DVAH para H1 SHORT."}
+  },
+  {
+    id:1002, par:"NAS100", fecha:"19/03/2026", precio:"24266",
+    prac:[
+      {previa:"Imb. Alcista", acep:"Dentro - sobre Y-VWAP ~23800", cond:"rot", dir:"a", ritmo:"T4"},
+      {previa:"Imb. Alcista", acep:"Dentro - sobre Q-VWAP ~23500", cond:"rot", dir:"a", ritmo:"T4"},
+      {previa:"Rot. Alcista", acep:"Dentro - sobre M-VWAP ~24000", cond:"rot", dir:"a", ritmo:"T3"},
+      {previa:"Imb. Bajista", acep:"Dentro - en W-VWAP ~24270",   cond:"rot", dir:"a", ritmo:"T3"}
+    ],
+    noticias:[
+      {hora:"14:30h", ind:"Jobless Claims USA",  imp:"y", ant:"223K", prev:"220K", afecta:"USD/indices", accion:"Volatilidad media - esperar confirmacion"},
+      {hora:"15:45h", ind:"S&P Flash PMI (Mar)", imp:"r", ant:"51.6", prev:"51.8", afecta:"NAS100",      accion:"Evitar apertura 5min antes"}
+    ],
+    escTipo:"FA - Fully Aligned Alcista",
+    escDesc:"Y+Q+M+W todos rotacionales alcistas. Escenario de maxima calidad. Buscar LONG en T3 sobre W-VWAP con objetivo W-DVAH ~24600.",
+    calc:{entrada:"24270",sl:"24100",tp:"24600",balance:"5000",dll:"50",exec:"2",pip:"0.10"},
+    hips:[
+      {cal:"A",dir:"LONG", why:"FA alcista: Y+Q+M+W todos alcistas. Maxima calidad. T3 sobre W-VWAP con toda la marea a favor.",
+       entrada:"24270",tp:"24600",sl:"24100",cond:"FCS alcista sobre W-VWAP + delta positivo + HA verde sin mecha inferior"},
+      {cal:"B",dir:"LONG", why:"Si no llega a W-VWAP, compra en M-VWAP ~24100 como segundo nivel. Calidad B.",
+       entrada:"24100",tp:"24500",sl:"23950",cond:"FCS alcista en M-VWAP + rebote tecnico claro"},
+      {cal:"C",dir:"SHORT",why:"Solo si rompe bajo W-DVAL con aceptacion. Muy baja probabilidad hoy.",
+       entrada:"23990",tp:"23700",sl:"24120",cond:"Aceptacion bajo W-DVAL + cierre semanal bajista"}
+    ],
+    review:{emocion:"😎 Confiado",slYN:"yes",planYN:"yes",revengeYN:"no",dllYN:"yes",ttpYN:"yes",
+            pnl:"+47.80",hip:"H1",
+            leccion:"FA alcista funciono perfectamente. La clave fue tener el escenario claro antes de abrir el mercado.",
+            objetivo:"Replicar proceso FA. No sobreoperar en dias de CMP o CAT."}
+  },
+  {
+    id:1003, par:"XAUUSD", fecha:"18/03/2026", precio:"4877",
+    prac:[
+      {previa:"Imb. Alcista", acep:"Dentro - sobre Y-VWAP ~4600", cond:"rot", dir:"a", ritmo:"T4"},
+      {previa:"Imb. Bajista", acep:"Dentro - bajo Q-VWAP ~5100",  cond:"rot", dir:"b", ritmo:"T2"},
+      {previa:"Imb. Bajista", acep:"Fuera - bajo M-DVAL ~4950",   cond:"imb", dir:"b", ritmo:"T3"},
+      {previa:"Imb. Bajista", acep:"Fuera - bajo W-DVAL ~4900",   cond:"imb", dir:"b", ritmo:"T3"}
+    ],
+    noticias:[
+      {hora:"Continuo", ind:"Conflicto Oriente Medio",      imp:"r", ant:"Escala", prev:"Escala", afecta:"XAUUSD alcista", accion:"Oro refugio vs USD fuerte - ambiguo"},
+      {hora:"20:00h",   ind:"Fed Bullard discurso hawkish", imp:"r", ant:"---",    prev:"Hawkish", afecta:"USD/oro",       accion:"ALTO RIESGO - evitar 30min antes/despues"}
+    ],
+    escTipo:"CAT - Conflicto Alto Plazo - NO OPERAR",
+    escDesc:"Y alcista vs Q+M+W bajistas. Conflicto anual vs resto. Bajisima calidad. Demasiado ruido macro. Dia para no operar.",
+    calc:{entrada:"4877",sl:"4920",tp:"4700",balance:"5000",dll:"50",exec:"2",pip:"0.10"},
+    hips:[
+      {cal:"C",dir:"SHORT",why:"M+W imbalance bajista pero Y alcista da conflicto. Calidad C. Discurso Fed a las 20h aniade riesgo.",
+       entrada:"4877",tp:"4700",sl:"4920",cond:"Solo si FCS bajista + sin noticias activas + delta negativo"},
+      {cal:"C",dir:"LONG", why:"Y alcista podria dominar si hay sorpresa geopolitica. Muy baja probabilidad.",
+       entrada:"4820",tp:"5000",sl:"4780",cond:"Solo si rompe W-DVAH con volumen + cierre diario alcista"},
+      {cal:"C",dir:"SHORT",why:"Continuacion bajista si rompe minimos. Solo traders experimentados.",
+       entrada:"4800",tp:"4650",sl:"4840",cond:"Rotura W-DVAL + aceptacion + volumen bajista"}
+    ],
+    review:{emocion:"😤 Frustrado",slYN:"no",planYN:"no",revengeYN:"yes",dllYN:"no",ttpYN:"no",
+            pnl:"-941.38",hip:"Ninguna - opere sin plan",
+            leccion:"DIA CATASTROFICO. No respete el escenario CAT. 13 operaciones sin SL 0.1 lotes. Perdi 941 dolares. Es la razon por la que existen las reglas de emergencia.",
+            objetivo:"REGLA ABSOLUTA: en CAT o noticias alto impacto NO OPERAR sin excepcion."}
+  },
+  {
+    id:1004, par:"CADJPY", fecha:"30/03/2026", precio:"114.72",
+    prac:[
+      {previa:"Imb. Alcista",       acep:"Fuera sup - sobre Y-VWAP ~107 · extencion alcista",   cond:"imb", dir:"a", ritmo:"T4"},
+      {previa:"Imb. Alcista",       acep:"Borde inferior DVA ~114.70 · zona de valor inst.",      cond:"rot", dir:"a", ritmo:"T3"},
+      {previa:"Rot. Alcista",       acep:"Fuera sup - pullback a nivel ruptura ~114.70-115.00",   cond:"rot", dir:"a", ritmo:"T3"},
+      {previa:"Imb. Bajista prev.", acep:"Fuera inf - caida vertical bajo DVA semanal · sin ago.", cond:"imb", dir:"b", ritmo:"T2"}
+    ],
+    noticias:[
+      {hora:"Continuo", ind:"BoJ hawkish - posible subida tipos", imp:"r", ant:"0.50%", prev:"Hold/Hike", afecta:"JPY fuerte · CADJPY baja", accion:"RIESGO CLAVE - si sube tipos invalidacion total del largo"},
+      {hora:"Continuo", ind:"Negociaciones CUSMA / Aranceles Trump", imp:"y", ant:"Tension", prev:"Tension", afecta:"CAD bajista", accion:"Presion macro sobre CAD hasta julio 2026"},
+      {hora:"Continuo", ind:"Oil prices - correlacion CAD", imp:"y", ant:"Oil fuerte", prev:"Oil fuerte", afecta:"CAD alcista", accion:"Oil fuerte = favorable para CADJPY largo"}
+    ],
+    escTipo:"FA Alcista swing - ESPERANDO CONFIRMACION",
+    escDesc:"Y+Q+M rotacionales/imbalance alcistas. W fuera DVA bajista (pullback activo). Precio en zona de maxima confluencia: borde DVA 4H + retest ruptura 2H (113.40->117) + DVAH Mensual + VWAP Trimestral + Fib 50% (~114.47-115.00). Escenario FA alcista de calidad A si confirma vela de reversion en zona con Fi normalizado. Carry trade favorable: tipo CAD > tipo JPY.",
+    calc:{entrada:"114.80",sl:"113.84",tp:"117.00",balance:"5000",dll:"50",exec:"2",pip:"0.91"},
+    hips:[
+      {cal:"A",dir:"LONG",
+       why:"Y+Q+M alcistas alineados. Pullback a zona de maxima confluencia DVA 4H + retest ruptura 2H + DVAH Mensual + VWAP Trimestral + Fib 50% (114.47-115.00). Carry trade positivo. Calidad A si confirma Fi y vela de reversion.",
+       entrada:"114.80",tp:"117.00",sl:"113.84",cond:"Vela reversion 1H/15min en zona + MACD histograma reduciendo + JPY Fi bajo +15 + CAD Fi en positivo/neutral"},
+      {cal:"A",dir:"LONG",
+       why:"Extension si rompe 117.00 con aceptacion. Objetivo macro resistencia CONQUER 119.313. Activar solo si H1 en beneficio y precio supera 117 con fuerza.",
+       entrada:"117.00",tp:"119.313",sl:"116.10",cond:"Cierre diario sobre 117.00 + DVA semanal en expansion alcista + trailing stop desde 116.10"},
+      {cal:"C",dir:"SHORT",
+       why:"Invalidacion total si cierre 4H bajo 113.84 (Fib 61.8%). BoJ hawkish agresivo o JPY Fi sostenido sobre +30 varios dias. En ese caso el par podria buscar 111.78 o inferiores.",
+       entrada:"113.80",tp:"111.78",sl:"114.50",cond:"Cierre 4H bajo 113.84 + aceptacion bajo zona + Fi JPY sostenido sobre +30"}
+    ],
+    review:{emocion:"😌 Tranquilo",slYN:"",planYN:"",revengeYN:"",dllYN:"",ttpYN:"",
+            pnl:"",hip:"",
+            leccion:"",
+            objetivo:"Esperar confirmacion completa del checklist antes de ejecutar. Paciencia > ansiedad de entrada. No operar si Fi JPY sigue en +50."}
+  }
+];
+
+function getTodos(){
+  const g=JSON.parse(localStorage.getItem('prac_hist')||'[]');
+  return [...EJEMPLOS,...g];
+}
+
+// ── COLORES SELECTORES ──
+function colorCond(sel) {
+  const map = { rot:['#FFF3CD','#856404','#F0C040'], imb:['#FADBD8','#922B21','#DC3545'] };
+  const v = map[sel.value];
+  if (v) { sel.style.background=v[0]; sel.style.color=v[1]; sel.style.borderColor=v[2]; }
+  else    { sel.style.background='#fff'; sel.style.color='#555'; sel.style.borderColor='#CCC'; }
+}
+function colorDir(sel) {
+  const map = { a:['#1A7A3A','bold'], b:['#DC3545','bold'], n:['#777','normal'] };
+  const v = map[sel.value];
+  if (v) { sel.style.color=v[0]; sel.style.fontWeight=v[1]; }
+  else   { sel.style.color='#555'; sel.style.fontWeight='normal'; }
+}
+function colorImp(sel) {
+  const map = { r:['#FEF0F0','#DC3545'], y:['#FFFBEA','#8A6500'], g:['#F0FFF4','#1A5C3A'] };
+  const v = map[sel.value];
+  if (v) { sel.style.background=v[0]; sel.style.color=v[1]; }
+  else   { sel.style.background='white'; sel.style.color='#555'; }
+}
+function colorHipSel(sel, tipo) {
+  if (tipo === 'cal') {
+    const map = { A:['#D5F5E3','#1A5C3A'], B:['#FFF3CD','#856404'], C:['#FADBD8','#922B21'] };
+    const v = map[sel.value];
+    if (v) { sel.style.background=v[0]; sel.style.color=v[1]; sel.style.borderColor=v[1]; }
+    else   { sel.style.background='white'; sel.style.color='#555'; sel.style.borderColor='#CCC'; }
+  } else {
+    const map = { LONG:['#D5F5E3','#1A5C3A'], SHORT:['#FADBD8','#922B21'] };
+    const v = map[sel.value];
+    if (v) { sel.style.background=v[0]; sel.style.color=v[1]; sel.style.borderColor=v[1]; }
+    else   { sel.style.background='white'; sel.style.color='#555'; sel.style.borderColor='#CCC'; }
+  }
+}
+
+// ── CALCULADORA RR ──
+function calcRR() {
+  const e  = parseFloat(document.getElementById('c-entrada').value);
+  const sl = parseFloat(document.getElementById('c-sl').value);
+  const tp = parseFloat(document.getElementById('c-tp').value);
+  if (isNaN(e) || isNaN(sl) || isNaN(tp)) return;
+  const pipSL = Math.abs((e - sl) * 10000);
+  const pipTP = Math.abs((tp - e) * 10000);
+  const rr    = pipTP / pipSL;
+  document.getElementById('r-pipssl').textContent = pipSL.toFixed(1) + ' pips';
+  document.getElementById('r-pipstp').textContent = pipTP.toFixed(1) + ' pips';
+  const rrEl = document.getElementById('r-rr');
+  rrEl.textContent = rr.toFixed(2) + 'R';
+  rrEl.className = 'calc-result ' + (rr >= 2 ? 'verde' : 'rojo');
+}
+
+// ── CALCULADORA LOTES ──
+function calcLotes() {
+  const bal  = parseFloat(document.getElementById('c-balance').value) || 5000;
+  const dll  = parseFloat(document.getElementById('c-dll').value) || 50;
+  const exec = parseFloat(document.getElementById('c-exec').value) || 2;
+  const pip  = parseFloat(document.getElementById('c-pip').value) || 0.10;
+  const sl   = parseFloat(document.getElementById('c-sl').value);
+  const e    = parseFloat(document.getElementById('c-entrada').value);
+  const rTrade = dll / exec;
+  document.getElementById('r-rdolar').textContent = '$' + rTrade.toFixed(2);
+  if (!isNaN(sl) && !isNaN(e)) {
+    const pipsSL = Math.abs((e - sl) * 10000);
+    if (pipsSL > 0) {
+      const lotes = rTrade / (pipsSL * pip * 100);
+      const lotesRedondeados = Math.floor(lotes * 100) / 100;
+      document.getElementById('r-lotes').textContent = lotesRedondeados.toFixed(2) + ' lotes';
+      document.getElementById('r-resumen').innerHTML =
+        `Con <b>$${rTrade.toFixed(0)}</b> de riesgo, SL de <b>${pipsSL.toFixed(0)} pips</b> y valor pip <b>$${pip}/pip</b> → abrir <b>${lotesRedondeados.toFixed(2)} lotes</b>.<br>
+         Si el SL salta: pierdes <b>$${(pipsSL * pip * lotesRedondeados * 100).toFixed(2)}</b> · DLL restante: <b>$${(dll - rTrade).toFixed(2)}</b>`;
+      return;
+    }
+  }
+  document.getElementById('r-lotes').textContent = '—';
+  document.getElementById('r-resumen').textContent = 'Rellena entrada y SL para calcular los lotes.';
+}
+
+// ── RR POR HIPÓTESIS ──
+function calcHipRR(h) {
+  const e  = parseFloat(document.getElementById(h+'-entrada').value);
+  const sl = parseFloat(document.getElementById(h+'-sl').value);
+  const tp = parseFloat(document.getElementById(h+'-tp').value);
+  const badge = document.getElementById(h+'-rr-badge');
+  if (isNaN(e) || isNaN(sl) || isNaN(tp)) { badge.style.display='none'; return; }
+  const rr = Math.abs((tp - e)) / Math.abs((sl - e));
+  badge.style.display = 'inline-block';
+  badge.textContent   = 'RR: ' + rr.toFixed(2) + 'R';
+  badge.className     = 'rr-badge ' + (rr >= 2 ? 'rr-ok' : 'rr-ko');
+}
+
+// ── NOTICIAS — añadir fila ──
+function addNewsRow() {
+  const tbody = document.getElementById('news-body');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input class="news-inp" placeholder="08:30h"/></td>
+    <td><input class="news-inp" placeholder="Indicador"/></td>
+    <td><select class="imp-sel" onchange="colorImp(this)"><option value="">—</option><option value="r">🔴 Alto</option><option value="y">🟡 Medio</option><option value="g">🟢 Bajo</option></select></td>
+    <td><input class="news-inp" placeholder="—"/></td>
+    <td><input class="news-inp" placeholder="—"/></td>
+    <td><input class="news-inp" placeholder="USD/EUR…"/></td>
+    <td><input class="news-inp" placeholder="Nota"/></td>`;
+  tbody.appendChild(tr);
+}
+
+// ── EMOJIS + Y/N ──
+function selectEmoji(btn) {
+  document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+function selectYN(btn, inputId, val) {
+  const parent = btn.closest('.yn-row');
+  parent.querySelectorAll('.yn-btn').forEach(b => b.className='yn-btn');
+  btn.classList.add(val);
+  document.getElementById(inputId).value = val;
+}
+
+// ── RECOGER DATOS ──
+function recogerDatos() {
+  const rows = document.querySelectorAll('#prac-body tr');
+  const prac = Array.from(rows).map(tr => {
+    const inps = tr.querySelectorAll('input,select');
+    return { previa: inps[0]?.value, acep: inps[1]?.value, cond: inps[2]?.value, dir: inps[3]?.value, ritmo: inps[4]?.value };
+  });
+  const newsRows = document.querySelectorAll('#news-body tr');
+  const noticias = Array.from(newsRows).map(tr => {
+    const inps = tr.querySelectorAll('input,select');
+    return { hora:inps[0]?.value, ind:inps[1]?.value, imp:inps[2]?.value, ant:inps[3]?.value, prev:inps[4]?.value, afecta:inps[5]?.value, accion:inps[6]?.value };
+  });
+  return {
+    id: Date.now(),
+    par: document.getElementById('par').value,
+    fecha: document.getElementById('fecha').value,
+    precio: document.getElementById('precio').value,
+    prac, noticias,
+    escTipo: document.getElementById('escenario-tipo').value,
+    escDesc: document.getElementById('escenario-desc').value,
+    calc: {
+      entrada: document.getElementById('c-entrada').value,
+      sl: document.getElementById('c-sl').value,
+      tp: document.getElementById('c-tp').value,
+      balance: document.getElementById('c-balance').value,
+      dll: document.getElementById('c-dll').value,
+      exec: document.getElementById('c-exec').value,
+      pip: document.getElementById('c-pip').value,
+    },
+    hips: ['h1','h2','h3'].map(h => ({
+      cal: document.getElementById(h+'-cal').value,
+      dir: document.getElementById(h+'-dir').value,
+      why: document.getElementById(h+'-why').value,
+      entrada: document.getElementById(h+'-entrada').value,
+      tp: document.getElementById(h+'-tp').value,
+      sl: document.getElementById(h+'-sl').value,
+      cond: document.getElementById(h+'-cond').value,
+    })),
+    review: {
+      emocion: document.querySelector('.emoji-btn.selected')?.textContent || '',
+      slYN: document.getElementById('sl-yn').value,
+      planYN: document.getElementById('plan-yn').value,
+      revengeYN: document.getElementById('revenge-yn').value,
+      dllYN: document.getElementById('dll-yn').value,
+      ttpYN: document.getElementById('ttp-yn').value,
+      pnl: document.getElementById('rev-pnl').value,
+      hip: document.getElementById('rev-hip').value,
+      leccion: document.getElementById('rev-leccion').value,
+      objetivo: document.getElementById('rev-objetivo').value,
+    }
+  };
+}
+
+// ── GUARDAR ──
+function guardarPrac() {
+  const datos = recogerDatos();
+  if (!datos.par && !datos.fecha) { toast('⚠ Rellena al menos el par y la fecha'); return; }
+  const lista = JSON.parse(localStorage.getItem('prac_hist') || '[]');
+  lista.unshift(datos);
+  localStorage.setItem('prac_hist', JSON.stringify(lista));
+  renderHistorial();
+  toast('✅ PRAC guardado — ' + (datos.par || '?') + ' ' + (datos.fecha || ''));
+}
+
+// ── CARGAR PRAC ──
+function cargarPrac(datos, idx) {
+  document.getElementById('par').value    = datos.par || '';
+  document.getElementById('fecha').value  = datos.fecha || '';
+  document.getElementById('precio').value = datos.precio || '';
+  document.getElementById('escenario-tipo').value = datos.escTipo || '';
+  document.getElementById('escenario-desc').value = datos.escDesc || '';
+
+  const rows = document.querySelectorAll('#prac-body tr');
+  datos.prac?.forEach((p, i) => {
+    if (!rows[i]) return;
+    const inps = rows[i].querySelectorAll('input,select');
+    if (inps[0]) inps[0].value = p.previa || '';
+    if (inps[1]) inps[1].value = p.acep   || '';
+    if (inps[2]) { inps[2].value = p.cond || ''; colorCond(inps[2]); }
+    if (inps[3]) { inps[3].value = p.dir  || ''; colorDir(inps[3]); }
+    if (inps[4]) inps[4].value = p.ritmo  || '';
+  });
+
+  // Rebuild noticias rows
+  const nb=document.getElementById('news-body');
+  if(nb&&datos.noticias&&datos.noticias.length>0){
+    nb.innerHTML='';
+    datos.noticias.forEach(n=>{
+      if(!n.hora&&!n.ind)return;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td><input class="news-inp" value="${n.hora||''}"/></td><td><input class="news-inp" value="${n.ind||''}"/></td><td><select class="imp-sel" onchange="colorImp(this)"><option value="">-</option><option value="r"${n.imp==='r'?' selected':''}>🔴 Alto</option><option value="y"${n.imp==='y'?' selected':''}>🟡 Medio</option><option value="g"${n.imp==='g'?' selected':''}>🟢 Bajo</option></select></td><td><input class="news-inp" value="${n.ant||''}"/></td><td><input class="news-inp" value="${n.prev||''}"/></td><td><input class="news-inp" value="${n.afecta||''}"/></td><td><input class="news-inp" value="${n.accion||''}"/></td>`;
+      nb.appendChild(tr);
+      colorImp(tr.querySelector('.imp-sel'));
+    });
+  }
+  if (datos.calc) {
+    ['entrada','sl','tp','balance','dll','exec','pip'].forEach(k => {
+      const el = document.getElementById('c-'+k);
+      if (el) el.value = datos.calc[k] || '';
+    });
+    calcRR(); calcLotes();
+  }
+
+  datos.hips?.forEach((h, i) => {
+    const key = ['h1','h2','h3'][i];
+    const cal = document.getElementById(key+'-cal');
+    const dir = document.getElementById(key+'-dir');
+    if (cal) { cal.value = h.cal || ''; colorHipSel(cal,'cal'); }
+    if (dir) { dir.value = h.dir || ''; colorHipSel(dir,'dir'); }
+    document.getElementById(key+'-why').value    = h.why    || '';
+    document.getElementById(key+'-entrada').value= h.entrada|| '';
+    document.getElementById(key+'-tp').value     = h.tp     || '';
+    document.getElementById(key+'-sl').value     = h.sl     || '';
+    document.getElementById(key+'-cond').value   = h.cond   || '';
+    calcHipRR(key);
+  });
+
+  if (datos.review) {
+    const r = datos.review;
+    document.querySelectorAll('.emoji-btn').forEach(b => {
+      b.classList.toggle('selected', b.textContent === r.emocion);
+    });
+    ['sl','plan','revenge','dll','ttp'].forEach(k => {
+      const val = r[k+'YN'];
+      if (!val) return;
+      const row = document.getElementById(k+'-yn').closest('.rev-campo').querySelector('.yn-row');
+      row?.querySelectorAll('.yn-btn').forEach(b => b.className = 'yn-btn');
+      const target = row?.querySelector(val === 'yes' ? ':first-child' : ':last-child');
+      if (target) target.classList.add(val);
+      document.getElementById(k+'-yn').value = val;
+    });
+    document.getElementById('rev-pnl').value     = r.pnl     || '';
+    document.getElementById('rev-hip').value     = r.hip     || '';
+    document.getElementById('rev-leccion').value = r.leccion || '';
+    document.getElementById('rev-objetivo').value= r.objetivo|| '';
+  }
+
+  document.querySelectorAll('.hist-item').forEach(el=>el.classList.remove('active-item'));
+  if(idx!==undefined){const items=document.querySelectorAll('.hist-item');if(items[idx])items[idx].classList.add('active-item');}
+  document.querySelectorAll('.hist-item').forEach(el=>el.classList.remove('active-item'));
+  if(idx!==undefined){const items=document.querySelectorAll('.hist-item');if(items[idx])items[idx].classList.add('active-item');}
+  document.querySelector('.main').scrollTo(0, 0);
+  toast('📂 PRAC cargado — ' + (datos.par || '') + ' ' + (datos.fecha || ''));
+}
+
+// ── NUEVO ──
+function nuevoPrac() {
+  if (!confirm('¿Crear nuevo PRAC? Se perderán los datos no guardados.')) return;
+  document.querySelectorAll('input:not([type=hidden]), textarea').forEach(el => el.value = '');
+  document.querySelectorAll('select').forEach(sel => {
+    sel.selectedIndex = 0;
+    sel.style.cssText = '';
+  });
+  document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.yn-btn').forEach(b => b.className = 'yn-btn');
+  ['sl-yn','plan-yn','revenge-yn','dll-yn','ttp-yn'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  ['h1','h2','h3'].forEach(h => { const b = document.getElementById(h+'-rr-badge'); if(b) b.style.display='none'; });
+  ['r-pipssl','r-pipstp','r-rr','r-rdolar','r-lotes'].forEach(id => {
+    const el = document.getElementById(id); if(el) { el.textContent='—'; el.className='calc-result'; }
+  });
+  document.querySelector('.main').scrollTo(0, 0);
+}
+
+// ── HISTORIAL ──
+function renderHistorial() {
+  const cont  = document.getElementById('historial-lista');
+  const todos = getTodos();
+  const ecol  = e => e&&e.includes('FA')?'#7EC87E':e&&e.includes('CAT')?'#E87E7E':e&&e.includes('CMP')?'#F5C07A':'#AAA';
+
+  // Filtros
+  const fPar = (document.getElementById('f-par')?.value || '').toLowerCase();
+  const fEsc = document.getElementById('f-esc')?.value || '';
+  const fDir = document.getElementById('f-dir')?.value || '';
+
+  const filtrados = todos.filter((p, i) => {
+    if (fPar && !(p.par||'').toLowerCase().includes(fPar)) return false;
+    if (fEsc && !(p.escTipo||'').includes(fEsc)) return false;
+    if (fDir) {
+      const hips = p.hips || [];
+      const tieneDir = hips.some(h => h.dir === fDir);
+      if (!tieneDir) return false;
+    }
+    return true;
+  });
+
+  if (filtrados.length === 0) {
+    cont.innerHTML = '<div class="empty-hist">Sin resultados.<br>Prueba otros filtros.</div>';
+    return;
+  }
+
+  cont.innerHTML = filtrados.map((p) => {
+    const i = todos.indexOf(p);
+    const isEx = i < EJEMPLOS.length;
+    const pnl = parseFloat((p.review||{}).pnl);
+    const pnlStr = isNaN(pnl) ? '' : (pnl >= 0 ? `<span style="color:#7EC87E;font-size:10px;float:right">+$${pnl.toFixed(0)}</span>` : `<span style="color:#E87E7E;font-size:10px;float:right">$${pnl.toFixed(0)}</span>`);
+    return `<div class="hist-item" onclick="cargarPrac(getTodos()[${i}],${i}); setVista('prac')">
+      ${!isEx?`<span class="hi-del" onclick="event.stopPropagation();eliminarPrac(${i-EJEMPLOS.length})">x</span>`:''}
+      <div class="hi-par">${p.par||'?'} ${pnlStr} <span style="font-size:9px;color:rgba(255,255,255,0.3)">${isEx?'· ej':''}</span></div>
+      <div class="hi-fecha">${p.fecha||'-'} · ${p.precio||''}</div>
+      <div class="hi-esc" style="color:${ecol(p.escTipo)}">${(p.escTipo||'-').substring(0,28)}</div>
+    </div>`;
+  }).join('');
+}
+
+function eliminarPrac(i) {
+  if (!confirm('¿Eliminar este PRAC del historial?')) return;
+  const lista = JSON.parse(localStorage.getItem('prac_hist') || '[]');
+  lista.splice(i, 1);
+  localStorage.setItem('prac_hist', JSON.stringify(lista));
+  renderHistorial();
+  toast('🗑 PRAC eliminado');
+}
+
+// ── EXPORTAR / IMPORTAR ──
+function exportarJSON() {
+  const datos = recogerDatos();
+  const blob  = new Blob([JSON.stringify(datos, null, 2)], {type:'application/json'});
+  const a     = document.createElement('a');
+  a.href      = URL.createObjectURL(blob);
+  a.download  = `PRAC_${datos.par || 'sin_par'}_${datos.fecha || 'sin_fecha'}.json`;
+  a.click();
+  toast('📤 PRAC exportado');
+}
+
+function exportarTodo() {
+  const lista = getTodos();
+  if (lista.length === 0) { toast('⚠ No hay PRACs'); return; }
+  const blob  = new Blob([JSON.stringify(lista, null, 2)], {type:'application/json'});
+  const a     = document.createElement('a');
+  a.href      = URL.createObjectURL(blob);
+  a.download  = `PRAC_historial_completo_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  toast('📦 Historial completo exportado (' + lista.length + ' PRACs)');
+}
+
+function importarJSON() {
+  document.getElementById('file-import').click();
+}
+
+function importarArchivo(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const datos = JSON.parse(ev.target.result);
+      if (Array.isArray(datos)) {
+        const lista = JSON.parse(localStorage.getItem('prac_hist') || '[]');
+        datos.forEach(d => lista.unshift(d));
+        localStorage.setItem('prac_hist', JSON.stringify(lista));
+        renderHistorial();
+        toast('📥 ' + datos.length + ' PRACs importados');
+      } else {
+        cargarPrac(datos);
+        toast('📥 PRAC importado — ' + (datos.par || '') + ' ' + (datos.fecha || ''));
+      }
+    } catch { toast('⚠ Archivo JSON no válido'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ── ESTUDIO CADJPY ──
+function toggleEstudio() {
+  const body = document.getElementById('estudio-body');
+  const icon = document.getElementById('estudio-toggle-icon');
+  const open = body.classList.toggle('open');
+  icon.textContent = open ? '▲ ocultar' : '▼ mostrar';
+}
+
+function estCheck(el, id) {
+  el.classList.toggle('est-done');
+  const total = 12;
+  const done  = document.querySelectorAll('.est-check.est-done').length;
+  document.getElementById('est-count').textContent = done + ' / ' + total;
+  document.getElementById('est-prog-fill').style.width = (done / total * 100) + '%';
+  const v = document.getElementById('est-verdict');
+  if (done === total) {
+    v.className = 'est-verdict go';
+    v.textContent = '✅ TODAS LAS CONDICIONES CUMPLIDAS — PUEDES EJECUTAR';
+  } else if (done >= 8) {
+    v.className = 'est-verdict casi';
+    v.textContent = '⚡ CASI — Faltan ' + (total - done) + ' condiciones. No precipitarse.';
+  } else {
+    v.className = 'est-verdict nogo';
+    v.textContent = '⛔ NO OPERAR AÚN — ' + done + '/' + total + ' condiciones cumplidas';
+  }
+}
+
+// ── TOAST ──
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ── INIT ──
+window.addEventListener('load', () => {
+  setVista('prac');
+  renderHistorial();
+  cargarPrac(EJEMPLOS[0], 0);
+  document.getElementById('c-balance').value = '5000';
+  document.getElementById('c-dll').value     = '50';
+  document.getElementById('c-exec').value    = '2';
+  document.getElementById('c-pip').value     = '0.10';
+});
+</script>
+</body>
+</html>
