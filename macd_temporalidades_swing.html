@@ -1,0 +1,250 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+.wrap { padding: 12px 0; font-family: var(--font-sans, sans-serif); color: var(--color-text-primary); }
+.title { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+.sub { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 16px; line-height: 1.6; }
+.tf-row { display: grid; grid-template-columns: 90px 1fr 1fr; gap: 0; border: 1px solid var(--color-border-tertiary); border-radius: 12px; overflow: hidden; margin-bottom: 14px; }
+.tf-cell { padding: 10px 14px; font-size: 12px; border-bottom: 1px solid var(--color-border-tertiary); }
+.tf-cell:last-child { border-bottom: none; }
+.tf-head { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); background: var(--color-background-secondary); padding: 8px 14px; border-bottom: 1px solid var(--color-border-tertiary); }
+.tf-label { font-size: 13px; font-weight: 500; display: flex; flex-direction: column; gap: 3px; align-items: flex-start; justify-content: center; background: var(--color-background-secondary); border-right: 1px solid var(--color-border-tertiary); }
+.tf-content { border-right: 1px solid var(--color-border-tertiary); }
+.tf-content:last-child { border-right: none; }
+.badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 500; }
+.b-blue   { background: #E6F1FB; color: #0C447C; }
+.b-green  { background: #EAF3DE; color: #27500A; }
+.b-amber  { background: #FAEEDA; color: #633806; }
+.b-purple { background: #EEEDFE; color: #3C3489; }
+.b-gray   { background: var(--color-background-secondary); color: var(--color-text-secondary); border: 1px solid var(--color-border-secondary); }
+.b-red    { background: #FCEBEB; color: #791F1F; }
+.pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; margin: 2px 2px 2px 0; }
+.pill-sesgo  { background: #E6F1FB; color: #0C447C; }
+.pill-conf   { background: #EAF3DE; color: #27500A; }
+.pill-gatillo{ background: #FAEEDA; color: #633806; }
+.pill-exec   { background: #FCEBEB; color: #791F1F; }
+.flow { display: flex; align-items: center; gap: 0; margin: 14px 0; flex-wrap: wrap; }
+.flow-step { flex: 1; min-width: 120px; padding: 10px 12px; text-align: center; }
+.flow-step-tf { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+.flow-step-role { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.flow-step-desc { font-size: 11px; color: var(--color-text-secondary); line-height: 1.4; }
+.flow-arrow { font-size: 18px; color: var(--color-text-tertiary); padding: 0 4px; align-self: center; }
+.card { border: 1px solid var(--color-border-tertiary); border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+.card-head { padding: 9px 14px; background: var(--color-background-secondary); font-size: 12px; font-weight: 500; color: var(--color-text-secondary); }
+.card-body { padding: 12px 14px; font-size: 12px; color: var(--color-text-secondary); line-height: 1.7; }
+.example { border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; border: 1px solid var(--color-border-tertiary); }
+.ex-title { font-size: 12px; font-weight: 500; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.ex-body  { font-size: 12px; color: var(--color-text-secondary); line-height: 1.7; }
+.check { color: #27500A; font-weight: 500; }
+.cross { color: #791F1F; font-weight: 500; }
+.rule { border-left: 3px solid; padding: 10px 14px; border-radius: 0 8px 8px 0; margin-bottom: 8px; }
+.rule.verde  { border-color: #639922; background: #EAF3DE; }
+.rule.amber  { border-color: #BA7517; background: #FAEEDA; }
+.rule.roja   { border-color: #E24B4A; background: #FCEBEB; }
+.rule-t { font-size: 12px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 2px; }
+.rule-b { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; }
+.tab-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-secondary); font-size: 12px; cursor: pointer; font-family: var(--font-sans); transition: all .15s; margin-right: 6px; margin-bottom: 8px; }
+.tab-btn.on { background: var(--color-background-info); color: var(--color-text-info); border-color: #185FA5; font-weight: 500; }
+.tab-panel { display: none; }
+.tab-panel.on { display: block; }
+.num-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 11px; font-weight: 500; background: var(--color-background-info); color: var(--color-text-info); margin-right: 6px; flex-shrink: 0; }
+</style>
+
+<div class="wrap">
+  <div class="title">MACD en swing — qué temporalidad mirar</div>
+  <div class="sub">La confusion habitual: el MACD del 1H dice una cosa, el del 4H dice otra, el del diario otra. ¿Cual hago caso? La respuesta depende del ROL que tiene cada temporalidad en tu analisis, no de la temporalidad en si.</div>
+
+  <!-- FLUJO PRINCIPAL -->
+  <div class="card">
+    <div class="card-head">El flujo de temporalidades en swing (regla general)</div>
+    <div class="card-body" style="padding-bottom:6px;">
+      En swing trading usas 3 temporalidades con roles distintos. El MACD de cada una responde a una pregunta diferente.
+    </div>
+    <div class="flow">
+      <div class="flow-step" style="background:#E6F1FB;border-radius:10px;margin:8px;">
+        <div class="flow-step-role" style="color:#0C447C;">Sesgo</div>
+        <div class="flow-step-tf">Daily / 4H</div>
+        <div class="flow-step-desc">¿La tendencia principal me favorece? MACD debe confirmar direccion.</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="background:#EAF3DE;border-radius:10px;margin:8px;">
+        <div class="flow-step-role" style="color:#27500A;">Confirmacion</div>
+        <div class="flow-step-tf">4H / 1H</div>
+        <div class="flow-step-desc">¿El momentum en la zona de entrada esta agotando? Aqui ves el histograma.</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="background:#FAEEDA;border-radius:10px;margin:8px;">
+        <div class="flow-step-role" style="color:#633806;">Gatillo</div>
+        <div class="flow-step-tf">1H / 15min</div>
+        <div class="flow-step-desc">¿El MACD gira justo aqui? Histograma reduciendose = momento exacto.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLA POR TIPO DE SWING -->
+  <div style="margin-bottom:8px;">
+    <button class="tab-btn on" onclick="showTab('t1',this)">Swing largo (dias)</button>
+    <button class="tab-btn" onclick="showTab('t2',this)">Swing corto (horas)</button>
+    <button class="tab-btn" onclick="showTab('t3',this)">CADJPY — tu caso</button>
+  </div>
+
+  <!-- TAB 1: Swing largo -->
+  <div class="tab-panel on" id="t1">
+    <div class="tf-row">
+      <div class="tf-head">Temporalidad</div>
+      <div class="tf-head">Que miras en el MACD</div>
+      <div class="tf-head">Lo que te dice</div>
+
+      <div class="tf-label tf-cell"><span style="color:#0C447C;">Daily</span><span class="badge b-blue">Sesgo</span></div>
+      <div class="tf-cell tf-content">Direccion del MACD y si esta sobre o bajo cero. Histograma positivo o negativo. No te fijas en barras individuales.</div>
+      <div class="tf-cell">¿La tendencia macro me favorece para el LONG o SHORT? Si el MACD diario esta bajista y sigo planeando LONG, eres contratendencia — baja calidad.</div>
+
+      <div class="tf-label tf-cell"><span style="color:#27500A;">4H</span><span class="badge b-green">Confirmacion</span></div>
+      <div class="tf-cell tf-content">Si el histograma esta reduciendo (barras cada vez menores) o girando. Buscar el agotamiento del movimiento contrario a tu trade.</div>
+      <div class="tf-cell">¿El movimiento de corrección (contra mi trade) está perdiendo fuerza? Si el 4H muestra histograma reduciendose, el pullback se agota — zona de entrada proxima.</div>
+
+      <div class="tf-label tf-cell"><span style="color:#633806;">1H</span><span class="badge b-amber">Gatillo</span></div>
+      <div class="tf-cell tf-content">Histograma reduciendose en el minimo exacto + cruce MACD/Signal al alza (para LONG). Es el momento preciso.</div>
+      <div class="tf-cell">¿Justo ahora el momentum gira a mi favor? Esta es la señal de entrada. Sin esto no ejecutas aunque Daily y 4H esten alineados.</div>
+    </div>
+    <div class="rule verde">
+      <div class="rule-t">Resumen swing largo (dias)</div>
+      <div class="rule-b">Daily = direccion · 4H = agotamiento del pullback · 1H = gatillo de entrada. Si los tres apuntan en la misma direccion, maxima calidad. Si el Daily contradice, calidad B o C como maximo.</div>
+    </div>
+  </div>
+
+  <!-- TAB 2: Swing corto -->
+  <div class="tab-panel" id="t2">
+    <div class="tf-row">
+      <div class="tf-head">Temporalidad</div>
+      <div class="tf-head">Que miras en el MACD</div>
+      <div class="tf-head">Lo que te dice</div>
+
+      <div class="tf-label tf-cell"><span style="color:#0C447C;">4H</span><span class="badge b-blue">Sesgo</span></div>
+      <div class="tf-cell tf-content">Direccion general del MACD. Sobre o bajo cero. No analizar barra a barra — ver tendencia de la linea.</div>
+      <div class="tf-cell">¿El momentum del 4H me favorece? Un MACD 4H claramente alcista (sobre cero, subiendo) me dice que el sesgo es LONG en este swing corto.</div>
+
+      <div class="tf-label tf-cell"><span style="color:#27500A;">1H</span><span class="badge b-green">Confirmacion</span></div>
+      <div class="tf-cell tf-content">Histograma: ¿reduciendo barras en contra de mi trade? ¿Esta girando? Busco el agotamiento del movimiento contrario.</div>
+      <div class="tf-cell">¿El pullback del 1H se agota en la zona de entrada? Si el histograma 1H reduce sus barras rojas sobre soporte DVA, es confirmacion.</div>
+
+      <div class="tf-label tf-cell"><span style="color:#633806;">15min</span><span class="badge b-amber">Gatillo</span></div>
+      <div class="tf-cell tf-content">Cruce MACD/Signal o histograma girando positivo exactamente en la zona. Es el ultimo filtro antes de ejecutar.</div>
+      <div class="tf-cell">¿El momentum ya giró en el intradía? Si el 15min muestra el histograma verde y creciendo en la zona de entrada, ejecutas.</div>
+    </div>
+    <div class="rule verde">
+      <div class="rule-t">Resumen swing corto (horas)</div>
+      <div class="rule-b">4H = sesgo · 1H = confirmacion agotamiento · 15min = gatillo exacto. Desplazas todo un escalon abajo respecto al swing largo.</div>
+    </div>
+  </div>
+
+  <!-- TAB 3: CADJPY tu caso -->
+  <div class="tab-panel" id="t3">
+    <div class="example" style="background:#E6F1FB;">
+      <div class="ex-title"><span class="badge b-blue">Daily — Sesgo</span></div>
+      <div class="ex-body">
+        <span class="check">OK</span> MACD diario: alcista, sobre cero, medias apuntando arriba. La tendencia principal desde 111.78 es alcista.<br>
+        <strong>Lo que te dice:</strong> el sesgo LONG es correcto. El Daily no contradice — maxima calidad para el LONG swing.
+      </div>
+    </div>
+    <div class="example" style="background:#EAF3DE;">
+      <div class="ex-title"><span class="badge b-green">4H — Confirmacion</span></div>
+      <div class="ex-body">
+        <span class="check">CLAVE</span> Aqui miras si el histograma 4H esta reduciendo sus barras rojas en la zona 114.47–115.00.<br>
+        El pullback desde 117 ha sido bajista. Cuando el 4H muestre histograma reduciendose = el pullback se agota en tu zona.<br>
+        <strong>Lo que te dice:</strong> la correccion pierde fuerza — precio listo para retomar tendencia alcista.
+      </div>
+    </div>
+    <div class="example" style="background:#FAEEDA;">
+      <div class="ex-title"><span class="badge b-amber">1H — Gatillo</span></div>
+      <div class="ex-body">
+        <span class="check">GATILLO</span> Exactamente lo que estabas mirando antes. Histograma 1H reduciendo barras rojas + vela de reversion en zona.<br>
+        Cuando el 1H muestra MACD -0.132 y EMPIEZA a reducir (las barras se achican), ese es tu momento.<br>
+        <strong>Lo que te dice:</strong> el momentum bajista intradía se agota justo en tu zona de entrada. Ejecutas si Fi confirma.
+      </div>
+    </div>
+    <div class="rule amber">
+      <div class="rule-t">El error que no debes cometer en CADJPY ahora</div>
+      <div class="rule-b">Mirar el MACD 15min y asustarte porque sigue bajista. Normal — el 15min es solo el gatillo final, no el sesgo. Si el Daily y 4H estan bien y el 1H empieza a girar, el 15min te confirmara despues. No uses el 15min para decidir si el trade es bueno — usalo solo para decidir el momento exacto de entrada.</div>
+    </div>
+  </div>
+
+  <!-- REGLA MAESTRA -->
+  <div class="card" style="margin-top:4px;">
+    <div class="card-head">La regla maestra para no liarte nunca mas</div>
+    <div class="card-body">
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <span class="num-badge">1</span>
+          <div><strong>Sesgo (TF mayor):</strong> ¿el MACD esta sobre o bajo cero? ¿Apunta en mi direccion? Solo necesitas la tendencia general — no te fijes en barras individuales.</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <span class="num-badge">2</span>
+          <div><strong>Confirmacion (TF medio):</strong> ¿el histograma esta REDUCIENDO en contra de mi trade? Busco el agotamiento del movimiento contrario. Barras decrecientes = momentum se acaba.</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <span class="num-badge">3</span>
+          <div><strong>Gatillo (TF menor):</strong> ¿el MACD ya giro? Histograma verde y creciendo (para LONG) o cruce de lineas. Solo aqui ejecutas — no antes.</div>
+        </div>
+        <div style="border-top:1px solid var(--color-border-tertiary);padding-top:10px;margin-top:2px;font-size:12px;color:var(--color-text-secondary);">
+          Si el TF mayor y el medio estan bien pero el menor aun no giro: <strong>esperas</strong>.<br>
+          Si el menor gira pero el mayor contradice: <strong>no operas o bajas la calidad a B/C</strong>.<br>
+          Los tres alineados = <strong>calidad A, maxima confianza</strong>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFERENCIA RAPIDA -->
+  <div class="card">
+    <div class="card-head">Referencia rapida segun tu tipo de swing</div>
+    <div class="card-body" style="padding:0;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:var(--color-background-secondary);">
+            <th style="padding:8px 12px;text-align:left;font-weight:500;border-bottom:1px solid var(--color-border-tertiary);">Tipo de swing</th>
+            <th style="padding:8px 12px;text-align:center;font-weight:500;border-bottom:1px solid var(--color-border-tertiary);color:#0C447C;">Sesgo</th>
+            <th style="padding:8px 12px;text-align:center;font-weight:500;border-bottom:1px solid var(--color-border-tertiary);color:#27500A;">Confirmacion</th>
+            <th style="padding:8px 12px;text-align:center;font-weight:500;border-bottom:1px solid var(--color-border-tertiary);color:#633806;">Gatillo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--color-border-tertiary);">
+            <td style="padding:8px 12px;">Swing largo (dias-semanas)</td>
+            <td style="padding:8px 12px;text-align:center;"><span class="badge b-blue">Weekly / Daily</span></td>
+            <td style="padding:8px 12px;text-align:center;"><span class="badge b-green">4H</span></td>
+            <td style="padding:8px 12px;text-align:center;"><span class="badge b-amber">1H</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--color-border-tertiary);">
+            <td style="padding:8px 12px;">Swing medio (dias)</td>
+            <td style="padding:8px 12px;text-align:center;"><span class="badge b-blue">Daily</span></td>
+            <td style="padding:8px 12px;text-align:center;"><span class="badge b-green">4H</span></td>
+            <td style="padding:8px 12px;text-align:center;"><span class="badge b-amber">1H</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--color-border-tertiary);">
+            <td style="padding:8px 12px;">Swing corto (horas)</td>
+            <td style="padding:8px 12px;text-align:center;"><span class="badge b-blue">4H</span></td>
+            <td style="padding:8px 12px;text-align:center;"><span class="badge b-green">1H</span></td>
+            <td style="padding:8px 12px;text-align:center;"><span class="badge b-amber">15min</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;"><strong>CADJPY (tu caso hoy)</strong></td>
+            <td style="padding:8px 12px;text-align:center;"><span class="badge b-blue">Daily OK</span></td>
+            <td style="padding:8px 12px;text-align:center;"><span class="badge b-green">4H — clave</span></td>
+            <td style="padding:8px 12px;text-align:center;"><span class="badge b-amber">1H gatillo</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  btn.classList.add('on');
+}
+</script>
