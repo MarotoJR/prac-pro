@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MACD — Guía Completa MATVARD</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<style>
+:root {
+  --bg:      #0C0E14;
+  --bg2:     #13161F;
+  --bg3:     #1A1E2A;
+  --bg4:     #20253300;
+  --border:  rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text:    #E8EAF0;
+  --muted:   #8890A0;
+  --hint:    #555E70;
+  --green:   #3ECF8E;
+  --green-d: #1A5C3A;
+  --green-bg:rgba(62,207,142,0.08);
+  --red:     #F06060;
+  --red-d:   #8B1A1A;
+  --red-bg:  rgba(240,96,96,0.08);
+  --amber:   #F5A623;
+  --amber-bg:rgba(245,166,35,0.08);
+  --blue:    #60A8F0;
+  --blue-bg: rgba(96,168,240,0.08);
+  --purple:  #A89CF7;
+  --purple-bg:rgba(168,156,247,0.08);
+  --mono: 'DM Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.7;overflow-x:hidden;}
+
+/* grid bg */
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(62,207,142,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(62,207,142,0.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+
+.wrap{max-width:900px;margin:0 auto;padding:0 28px 80px;position:relative;z-index:1;}
+
+/* ── HEADER ── */
+.site-header{padding:32px 0 0;margin-bottom:0;}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-family:var(--mono);font-size:11px;text-decoration:none;letter-spacing:1px;transition:color .15s;margin-bottom:40px;}
+.back-link:hover{color:var(--green);}
+
+.hero{padding:48px 0 40px;border-bottom:1px solid var(--border);margin-bottom:0;}
+.hero-tag{font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.hero-tag::before{content:'';width:24px;height:1px;background:var(--green);}
+.hero-title{font-size:52px;font-weight:600;letter-spacing:-2.5px;line-height:1;margin-bottom:14px;}
+.hero-title span{color:var(--green);}
+.hero-sub{font-size:16px;color:var(--muted);font-weight:300;max-width:560px;line-height:1.6;margin-bottom:32px;}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border2);font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.chip.c-green{border-color:rgba(62,207,142,0.3);color:var(--green);background:var(--green-bg);}
+.chip.c-amber{border-color:rgba(245,166,35,0.3);color:var(--amber);background:var(--amber-bg);}
+
+/* ── NAV TABS ── */
+.nav-bar{position:sticky;top:0;z-index:50;background:rgba(12,14,20,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);margin:0 -28px;padding:0 28px;}
+.nav-tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.nav-btn{padding:14px 18px;border:none;background:transparent;color:var(--muted);font-family:var(--sans);font-size:13px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;position:relative;top:1px;}
+.nav-btn:hover{color:var(--text);}
+.nav-btn.on{color:var(--green);border-bottom-color:var(--green);font-weight:500;}
+
+/* ── PANELS ── */
+.panel{display:none;padding-top:48px;}
+.panel.on{display:block;animation:fadeUp .25s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── SECTION ANATOMY ── */
+.sec-tag{font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:10px;}
+.sec-title{font-size:34px;font-weight:600;letter-spacing:-1.5px;line-height:1.1;margin-bottom:8px;color:var(--text);}
+.sec-title em{font-style:italic;color:var(--green);}
+.sec-lead{font-size:16px;color:var(--muted);font-weight:300;line-height:1.65;max-width:660px;margin-bottom:36px;}
+
+.h3{font-size:19px;font-weight:500;letter-spacing:-0.5px;margin:36px 0 12px;color:var(--text);}
+.prose{color:var(--muted);margin-bottom:14px;font-size:14px;line-height:1.75;}
+.prose strong{color:var(--text);font-weight:500;}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:40px 0;}
+
+/* ── CALLOUT ── */
+.callout{border-radius:10px;padding:20px 22px;margin:24px 0;border:1px solid;}
+.callout-label{font-family:var(--mono);font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:500;margin-bottom:8px;}
+.callout-body{font-size:14px;line-height:1.7;}
+.callout.green{background:var(--green-bg);border-color:rgba(62,207,142,0.25);}
+.callout.green .callout-label{color:var(--green);}
+.callout.green .callout-body{color:#B0EED4;}
+.callout.red{background:var(--red-bg);border-color:rgba(240,96,96,0.25);}
+.callout.red .callout-label{color:var(--red);}
+.callout.red .callout-body{color:#F0B0B0;}
+.callout.amber{background:var(--amber-bg);border-color:rgba(245,166,35,0.25);}
+.callout.amber .callout-label{color:var(--amber);}
+.callout.amber .callout-body{color:#FAD090;}
+.callout.blue{background:var(--blue-bg);border-color:rgba(96,168,240,0.25);}
+.callout.blue .callout-label{color:var(--blue);}
+.callout.blue .callout-body{color:#A0C8F0;}
+.callout.purple{background:var(--purple-bg);border-color:rgba(168,156,247,0.25);}
+.callout.purple .callout-label{color:var(--purple);}
+.callout.purple .callout-body{color:#C8C0FA;}
+
+/* ── PULL QUOTE ── */
+.pq{border-left:3px solid var(--green);padding:16px 24px;margin:32px 0;background:var(--green-bg);border-radius:0 8px 8px 0;}
+.pq-text{font-size:17px;font-style:italic;color:var(--green);line-height:1.55;margin-bottom:6px;}
+.pq-cite{font-family:var(--mono);font-size:10px;color:rgba(62,207,142,0.5);letter-spacing:2px;text-transform:uppercase;}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;margin:24px 0;font-size:13px;}
+.tbl thead tr{background:var(--bg3);}
+.tbl th{padding:10px 14px;text-align:left;font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border2);}
+.tbl td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;line-height:1.55;}
+.tbl td:first-child{color:var(--text);font-weight:500;}
+.tbl td strong{color:var(--text);}
+.tbl tr:hover td{background:rgba(255,255,255,0.02);}
+.tbl tr.hl td{background:rgba(62,207,142,0.05);}
+.tbl tr.hl td:first-child{color:var(--green);}
+
+/* ── DEFINITION GRID ── */
+.def-grid{display:grid;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:24px 0;}
+.def-row{display:grid;grid-template-columns:160px 1fr;border-bottom:1px solid var(--border);}
+.def-row:last-child{border-bottom:none;}
+.def-key{padding:14px 16px;background:var(--bg3);font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;align-items:flex-start;padding-top:16px;}
+.def-val{padding:14px 16px;font-size:13px;color:var(--muted);line-height:1.65;}
+.def-val strong{color:var(--text);}
+
+/* ── FORMULA BOX ── */
+.formula{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:18px 22px;margin:20px 0;font-family:var(--mono);font-size:13px;color:var(--text);letter-spacing:0.5px;}
+.formula span{color:var(--green);}
+.formula small{display:block;font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:0;}
+
+/* ── BADGE ── */
+.badge{display:inline-block;padding:2px 9px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.5px;}
+.bg{background:rgba(62,207,142,0.15);color:var(--green);}
+.br{background:rgba(240,96,96,0.15);color:var(--red);}
+.ba{background:rgba(245,166,35,0.15);color:var(--amber);}
+.bb{background:rgba(96,168,240,0.15);color:var(--blue);}
+.bp{background:rgba(168,156,247,0.15);color:var(--purple);}
+.bx{background:var(--bg3);color:var(--muted);border:1px solid var(--border2);}
+
+/* ── CHART ── */
+.chart-box{background:#131722;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:20px;margin:28px 0;}
+.chart-label{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.chart-label::before{content:'FIG';background:var(--green);color:var(--bg);padding:2px 6px;border-radius:3px;font-size:8px;}
+.chart-note{font-size:12px;color:var(--hint);font-style:italic;margin-top:12px;line-height:1.5;padding-top:12px;border-top:1px solid var(--border);}
+
+/* ── SCENARIO CARD ── */
+.scenario{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:24px 0;}
+.scenario-head{padding:14px 20px;display:flex;align-items:center;gap:14px;}
+.scenario-head.long{background:var(--green-bg);border-bottom:1px solid rgba(62,207,142,0.15);}
+.scenario-head.short{background:var(--red-bg);border-bottom:1px solid rgba(240,96,96,0.15);}
+.scenario-head.wait{background:var(--amber-bg);border-bottom:1px solid rgba(245,166,35,0.15);}
+.scenario-type{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;}
+.scenario-head.long .scenario-type{color:var(--green);}
+.scenario-head.short .scenario-type{color:var(--red);}
+.scenario-head.wait .scenario-type{color:var(--amber);}
+.scenario-name{font-size:14px;font-weight:500;color:var(--text);}
+.scenario-body{padding:20px;}
+.scenario-body .prose{margin-bottom:10px;}
+.scenario-steps{list-style:none;margin:14px 0;}
+.scenario-steps li{display:flex;gap:12px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted);}
+.scenario-steps li:last-child{border-bottom:none;}
+.scenario-steps li::before{content:'→';color:var(--hint);flex-shrink:0;}
+.scenario-steps li strong{color:var(--text);}
+
+/* ── DIV CARDS ── */
+.div-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:24px 0;}
+.div-card{border-radius:10px;padding:20px;border:1px solid;}
+.div-card.alc{background:var(--green-bg);border-color:rgba(62,207,142,0.2);}
+.div-card.baj{background:var(--red-bg);border-color:rgba(240,96,96,0.2);}
+.div-card.oalc{background:var(--blue-bg);border-color:rgba(96,168,240,0.2);}
+.div-card.obaj{background:var(--amber-bg);border-color:rgba(245,166,35,0.2);}
+.div-type{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.div-card.alc .div-type{color:var(--green);}
+.div-card.baj .div-type{color:var(--red);}
+.div-card.oalc .div-type{color:var(--blue);}
+.div-card.obaj .div-type{color:var(--amber);}
+.div-title{font-size:15px;font-weight:500;margin-bottom:10px;line-height:1.3;}
+.div-card.alc .div-title{color:var(--green);}
+.div-card.baj .div-title{color:var(--red);}
+.div-card.oalc .div-title{color:var(--blue);}
+.div-card.obaj .div-title{color:var(--amber);}
+.div-body{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:12px;}
+.div-signal{font-family:var(--mono);font-size:11px;padding:7px 10px;border-radius:5px;background:var(--bg3);color:var(--muted);}
+
+/* ── MTF FLOW ── */
+.mtf-flow{display:flex;gap:0;margin:28px 0;}
+.mtf-step{flex:1;padding:20px 16px;text-align:center;border-radius:10px;}
+.mtf-sep{display:flex;align-items:center;padding:0 6px;color:var(--hint);font-size:20px;}
+.mtf-role{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.mtf-tf{font-size:22px;font-weight:600;margin-bottom:6px;letter-spacing:-1px;}
+.mtf-desc{font-size:12px;color:var(--muted);line-height:1.4;}
+.mtf-step.sesgo{background:rgba(96,168,240,0.08);border:1px solid rgba(96,168,240,0.15);}
+.mtf-step.sesgo .mtf-role{color:var(--blue);}
+.mtf-step.sesgo .mtf-tf{color:var(--blue);}
+.mtf-step.conf{background:rgba(62,207,142,0.08);border:1px solid rgba(62,207,142,0.15);}
+.mtf-step.conf .mtf-role{color:var(--green);}
+.mtf-step.conf .mtf-tf{color:var(--green);}
+.mtf-step.gat{background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.15);}
+.mtf-step.gat .mtf-role{color:var(--amber);}
+.mtf-step.gat .mtf-tf{color:var(--amber);}
+
+/* ── INTERACTIVE STEPS ── */
+.steps-nav{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+.step-pill{padding:7px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);transition:all .15s;}
+.step-pill:hover{color:var(--text);border-color:var(--border2);}
+.step-pill.on{background:var(--green-bg);border-color:rgba(62,207,142,0.3);color:var(--green);font-weight:500;}
+.step-panel{display:none;}
+.step-panel.on{display:block;animation:fadeUp .2s ease;}
+
+/* ── PROGRESS BAR ── */
+.prog-bar{height:3px;background:var(--border);border-radius:2px;margin:8px 0 20px;}
+.prog-fill{height:100%;background:var(--green);border-radius:2px;transition:width .3s;}
+
+/* ── QUIZ ── */
+.quiz-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:28px;margin-top:8px;}
+.quiz-counter{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:6px;letter-spacing:1px;}
+.quiz-q{font-size:17px;font-weight:500;color:var(--text);margin-bottom:24px;line-height:1.45;letter-spacing:-0.3px;}
+.q-opt{padding:12px 18px;border:1px solid var(--border2);border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:14px;color:var(--muted);transition:all .15s;display:flex;gap:12px;align-items:flex-start;}
+.q-opt:hover{border-color:var(--green);color:var(--text);background:var(--green-bg);}
+.q-opt.correct{background:var(--green-bg);border-color:rgba(62,207,142,0.5);color:var(--green);font-weight:500;}
+.q-opt.wrong{background:var(--red-bg);border-color:rgba(240,96,96,0.4);color:var(--red);}
+.q-letter{font-family:var(--mono);font-size:11px;min-width:20px;padding-top:1px;}
+.q-exp{background:var(--bg3);border-left:3px solid var(--green);padding:14px 18px;border-radius:0 8px 8px 0;font-size:13px;color:var(--muted);line-height:1.65;margin-top:14px;display:none;}
+.q-exp.show{display:block;}
+.quiz-footer{display:flex;align-items:center;justify-content:space-between;margin-top:20px;}
+.btn{padding:10px 22px;border-radius:6px;border:none;font-size:13px;cursor:pointer;font-family:var(--sans);transition:all .15s;font-weight:500;}
+.btn-green{background:var(--green);color:var(--bg);}
+.btn-green:hover{background:#5ADFAA;}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted);}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text);}
+.quiz-result{text-align:center;padding:48px 20px;}
+.result-num{font-size:72px;font-weight:600;letter-spacing:-4px;line-height:1;}
+.result-sub{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:2px;margin:8px 0 24px;}
+.result-msg{font-size:15px;color:var(--muted);max-width:380px;margin:0 auto 28px;line-height:1.6;}
+
+/* ── FOOTER ── */
+.site-footer{border-top:1px solid var(--border);padding:32px 0;display:flex;justify-content:space-between;align-items:center;margin-top:60px;}
+.footer-brand{font-family:var(--mono);font-size:12px;color:var(--muted);}
+.footer-link{font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;transition:color .15s;}
+.footer-link:hover{color:var(--green);}
+
+@media(max-width:640px){
+  .hero-title{font-size:36px;}
+  .div-pair{grid-template-columns:1fr;}
+  .mtf-flow{flex-direction:column;}
+  .mtf-sep{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="site-header">
+  <a href="../index.html" class="back-link">← Hub principal</a>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Guía completa · MATVARD · Indicadores</div>
+  <h1 class="hero-title">El <span>MACD</span><br>explicado</h1>
+  <p class="hero-sub">Momentum, histograma, divergencias regulares y ocultas, y qué temporalidad mirar en swing. Con ejemplos reales de tus trades.</p>
+  <div class="hero-chips">
+    <div class="chip c-green">7 secciones</div>
+    <div class="chip c-green">Gráficos interactivos</div>
+    <div class="chip c-amber">Test incluido</div>
+    <div class="chip">Marzo 2026</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav-bar">
+  <div class="nav-tabs">
+    <button class="nav-btn on"  onclick="tab('p1',this)">I. Qué es</button>
+    <button class="nav-btn"     onclick="tab('p2',this)">II. Componentes</button>
+    <button class="nav-btn"     onclick="tab('p3',this)">III. MATVARD</button>
+    <button class="nav-btn"     onclick="tab('p4',this)">IV. Divergencias</button>
+    <button class="nav-btn"     onclick="tab('p5',this)">V. Div. ocultas</button>
+    <button class="nav-btn"     onclick="tab('p6',this)">VI. Temporalidades</button>
+    <button class="nav-btn"     onclick="tab('p7',this)">VII. Test</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PANEL 1 — QUÉ ES -->
+<!-- ════════════════════════════════════════════ -->
+<div class="panel on" id="p1">
+  <div class="sec-tag">Sección I</div>
+  <h2 class="sec-title">¿Qué es el <em>MACD</em>?</h2>
+  <p class="sec-lead">Un indicador de momentum que mide la relación entre dos medias móviles. No predice el futuro — mide la fuerza del presente.</p>
+
+  <p class="prose">El <strong>MACD</strong> (Moving Average Convergence Divergence) fue creado por Gerald Appel en los años 70. Mide la convergencia y divergencia entre dos medias exponenciales del precio: cuando se acercan, el momentum pierde fuerza; cuando se alejan, se acelera.</p>
+
+  <div class="pq">
+    <div class="pq-text">El MACD no predice el futuro — mide la fuerza del presente. Un mercado con momentum fuerte tiende a continuar. Uno con momentum agotado tiende a girar.</div>
+    <div class="pq-cite">Principio base del análisis de momentum</div>
+  </div>
+
+  <div class="formula">
+    <span>MACD = EMA(12) − EMA(26)</span><br>
+    <span>Signal = EMA(9) aplicada al MACD</span><br>
+    <span>Histograma = MACD − Signal</span>
+    <small>EMA = Media Móvil Exponencial. Los números 12, 26 y 9 son los periodos estándar.</small>
+  </div>
+
+  <div class="def-grid">
+    <div class="def-row">
+      <div class="def-key"><span class="badge bb">EMA 12</span></div>
+      <div class="def-val"><strong>Media rápida.</strong> Reacciona al precio actual más rápido. Captura el movimiento reciente.</div>
+    </div>
+    <div class="def-row">
+      <div class="def-key"><span class="badge ba">EMA 26</span></div>
+      <div class="def-val"><strong>Media lenta.</strong> Reacciona más despacio. Representa la tendencia de más largo plazo.</div>
+    </div>
+    <div class="def-row">
+      <div class="def-key"><span class="badge bp">Línea MACD</span></div>
+      <div class="def-val"><strong>La diferencia entre ambas.</strong> Positiva = momentum alcista. Negativa = momentum bajista.</div>
+    </div>
+    <div class="def-row">
+      <div class="def-key"><span class="badge ba">Signal</span></div>
+      <div class="def-val"><strong>Suavizador.</strong> EMA de 9 periodos sobre el MACD. Reduce el ruido. El cruce MACD/Signal es señal clásica.</div>
+    </div>
+    <div class="def-row">
+      <div class="def-key"><span class="badge bg">Histograma</span></div>
+      <div class="def-val"><strong>El más importante en MATVARD.</strong> Muestra la velocidad del cambio. Barras creciendo = aceleración. Barras menguando = agotamiento.</div>
+    </div>
+  </div>
+
+  <div class="chart-box">
+    <div class="chart-label">Precio con EMA12/EMA26 arriba · MACD completo abajo</div>
+    <canvas id="c1" height="190"></canvas>
+    <p class="chart-note">Cuando la EMA rápida (verde) está por encima de la lenta (naranja), el MACD es positivo — momentum alcista. El histograma muestra si ese momentum está creciendo o agotándose.</p>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-label">Posición del MACD en la pirámide MATVARD</div>
+    <div class="callout-body">El orden de decisión en MATVARD es: <strong>Marco mental → Marco de mercado (DVA) → Estrategia → Flujo de órdenes (MACD + Fi).</strong> El MACD es el último filtro. Si todo lo anterior está verde pero el MACD contradice, no entras. El trade nace de la DVA — el MACD decide si ejecutas hoy o mañana.</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PANEL 2 — COMPONENTES -->
+<!-- ════════════════════════════════════════════ -->
+<div class="panel" id="p2">
+  <div class="sec-tag">Sección II</div>
+  <h2 class="sec-title">Los <em>3 componentes</em></h2>
+  <p class="sec-lead">La mayoría mira solo las líneas. En MATVARD lo que más importa son las barras — el histograma.</p>
+
+  <div class="steps-nav">
+    <button class="step-pill on" onclick="step('s2','s2a',this)">Línea MACD</button>
+    <button class="step-pill"    onclick="step('s2','s2b',this)">Signal line</button>
+    <button class="step-pill"    onclick="step('s2','s2c',this)">Histograma</button>
+    <button class="step-pill"    onclick="step('s2','s2d',this)">Línea cero</button>
+  </div>
+
+  <div class="step-panel on" id="s2a">
+    <h3 class="h3">La línea MACD <span class="badge bp">EMA12 − EMA26</span></h3>
+    <p class="prose">Es la diferencia pura entre las dos medias. Lo importante no es su nivel absoluto sino su <strong>dirección y pendiente</strong>:</p>
+    <div class="div-pair">
+      <div class="div-card alc">
+        <div class="div-type">Por encima del cero</div>
+        <div class="div-title">Momentum alcista</div>
+        <div class="div-body">La EMA rápida está sobre la lenta. Los compradores dominan. El mercado tiene sesgo positivo en este timeframe.</div>
+      </div>
+      <div class="div-card baj">
+        <div class="div-type">Por debajo del cero</div>
+        <div class="div-title">Momentum bajista</div>
+        <div class="div-body">La EMA rápida está bajo la lenta. Los vendedores dominan. El mercado tiene sesgo negativo en este timeframe.</div>
+      </div>
+    </div>
+    <div class="callout amber"><div class="callout-label">Pendiente importa más que nivel</div><div class="callout-body">Una línea MACD que está en -0.5 pero subiendo rápido es mejor señal para LONG que una en +0.2 pero cayendo. La dirección del cambio es lo que te dice adónde va el momentum.</div></div>
+  </div>
+
+  <div class="step-panel" id="s2b">
+    <h3 class="h3">La Signal line <span class="badge ba">EMA(9) del MACD</span></h3>
+    <p class="prose">Es una media exponencial de 9 periodos aplicada sobre la línea MACD. Su única función es <strong>suavizar la señal</strong> y reducir ruido.</p>
+    <p class="prose">El cruce entre MACD y Signal es la señal clásica de trading — pero en MATVARD es solo <strong>gatillo secundario</strong>, nunca la razón principal para entrar.</p>
+    <div class="callout amber"><div class="callout-label">El cruce en MATVARD</div><div class="callout-body">Si el contexto DVA, la zona y el Fi están alineados, un cruce MACD/Signal al alza <strong>añade confianza</strong> a la entrada LONG. Si entras solo porque hubo un cruce sin el resto del contexto, estás operando sin ventaja real — el mercado te dará entradas que no deberías tomar.</div></div>
+    <div class="chart-box">
+      <div class="chart-label">MACD, Signal y sus cruces</div>
+      <canvas id="c2" height="150"></canvas>
+      <p class="chart-note">Los cruces (MACD cruzando sobre/bajo Signal) son visibles pero no suficientes solos. Observa cómo algunos cruces ocurren ya tarde, cuando el movimiento está avanzado.</p>
+    </div>
+  </div>
+
+  <div class="step-panel" id="s2c">
+    <h3 class="h3">El histograma <span class="badge bg">MACD − Signal</span></h3>
+    <p class="prose">Las barras muestran la distancia entre MACD y Signal. Cuando crecen, el momentum se acelera. Cuando menguan, el momentum se agota. <strong>Esta es la información más valiosa para MATVARD.</strong></p>
+    <div class="div-pair">
+      <div class="div-card alc">
+        <div class="div-type">Barras verdes creciendo</div>
+        <div class="div-title">Momentum alcista acelerándose</div>
+        <div class="div-body">La distancia entre MACD y Signal aumenta. Los compradores están ganando fuerza. Señal de continuación alcista.</div>
+        <div class="div-signal">Para LONG: buena señal de continuación</div>
+      </div>
+      <div class="div-card baj">
+        <div class="div-type">Barras rojas menguando</div>
+        <div class="div-title">Momentum bajista agotándose</div>
+        <div class="div-body">Las barras rojas se hacen cada vez más pequeñas. Los vendedores pierden presión. Señal de posible giro o entrada LONG próxima.</div>
+        <div class="div-signal">Para LONG: buscar entrada aquí</div>
+      </div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-label">Histograma — barras creciendo y agotándose</div>
+      <canvas id="c2b" height="140"></canvas>
+      <p class="chart-note">Observa la reducción de las barras rojas antes de que el precio gire. Esa reducción — no el cruce — es la señal de agotamiento que usa MATVARD.</p>
+    </div>
+    <div class="callout green"><div class="callout-label">La regla del histograma en MATVARD</div><div class="callout-body">Para LONG: espera que las barras <strong>rojas se reduzcan</strong> (no que desaparezcan). No necesitas histograma positivo — solo que el momentum bajista pierda fuerza mientras el precio está en tu zona DVA. Esa reducción es tu confirmación.</div></div>
+  </div>
+
+  <div class="step-panel" id="s2d">
+    <h3 class="h3">La línea cero <span class="badge bx">Separador de momentum</span></h3>
+    <p class="prose">La línea cero es la frontera entre momentum alcista y bajista. Cuando el MACD cruza de negativo a positivo, las EMA se han cruzado — los compradores tomaron el control.</p>
+    <table class="tbl">
+      <thead><tr><th>MACD respecto al cero</th><th>Qué significa</th><th>En MATVARD</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge bg">Positivo y subiendo</span></td><td>Momentum alcista acelerándose</td><td>Sesgo LONG confirmado, buena zona para entradas largas</td></tr>
+        <tr><td><span class="badge bg">Positivo y bajando</span></td><td>Momentum alcista desacelerándose</td><td>Posible consolidación o pullback próximo</td></tr>
+        <tr><td><span class="badge br">Negativo y bajando</span></td><td>Momentum bajista acelerándose</td><td>Sesgo SHORT. Para LONG: esperar antes de entrar</td></tr>
+        <tr><td><span class="badge br">Negativo y subiendo</span></td><td>Momentum bajista desacelerándose</td><td>Agotamiento bajista — zona de vigilancia para LONG</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PANEL 3 — MATVARD -->
+<!-- ════════════════════════════════════════════ -->
+<div class="panel" id="p3">
+  <div class="sec-tag">Sección III</div>
+  <h2 class="sec-title">El MACD en <em>MATVARD</em></h2>
+  <p class="sec-lead">El MACD no genera el trade — lo confirma o lo cancela. El trade nace de la DVA. El MACD decide si ejecutas hoy o mañana.</p>
+
+  <div class="pq">
+    <div class="pq-text">El trade nace de la DVA. El MACD solo decide si ejecutas hoy o esperas mañana.</div>
+    <div class="pq-cite">Flujo de órdenes — método MATVARD</div>
+  </div>
+
+  <h3 class="h3">Los 3 usos en MATVARD</h3>
+
+  <div class="callout green">
+    <div class="callout-label">Uso 1 — Detectar agotamiento (el más usado)</div>
+    <div class="callout-body">Cuando buscas entrada LONG después de un pullback, no entras mientras el histograma sigue creciendo en negativo. Esperas a que las <strong>barras rojas empiecen a reducirse</strong>. Eso indica que la presión vendedora se está acabando. No necesitas que el histograma sea positivo — solo que las barras vayan a menos.</div>
+  </div>
+  <div class="callout amber">
+    <div class="callout-label">Uso 2 — Confirmar momentum a favor</div>
+    <div class="callout-body">En un trade LONG activo, el histograma debe estar en positivo o al menos <strong>girando hacia positivo</strong>. Si el MACD sigue profundamente negativo con barras creciendo en rojo, el momentum no te acompaña — espera o reduce el tamaño de posición.</div>
+  </div>
+  <div class="callout blue">
+    <div class="callout-label">Uso 3 — Cruce MACD/Signal como gatillo adicional</div>
+    <div class="callout-body">El cruce de la línea MACD sobre la Signal puede ser un <strong>gatillo secundario</strong> de confirmación de entrada. Siempre secundario al contexto DVA y Fi. Nunca entres solo porque hubo un cruce.</div>
+  </div>
+
+  <div class="divider"></div>
+  <h3 class="h3">3 escenarios reales con ejemplos</h3>
+
+  <div class="scenario">
+    <div class="scenario-head long">
+      <div class="scenario-type">Escenario LONG</div>
+      <div class="scenario-name">CADJPY — Largo Swing — Tu caso de hoy</div>
+    </div>
+    <div class="scenario-body">
+      <p class="prose"><strong>Contexto:</strong> precio en zona 114.47–115.00 (confluencia DVA 4H + retest ruptura 2H + Fib 50%). Tendencia diaria alcista. Fi JPY normalizando desde +50.</p>
+      <ul class="scenario-steps">
+        <li><strong>MACD Daily:</strong> sobre cero, pendiente alcista desde el rally de 111.78 → sesgo LONG correcto, no contradice</li>
+        <li><strong>MACD 4H:</strong> histograma reduciendo barras rojas en la zona de soporte → pullback agotándose exactamente en tu zona</li>
+        <li><strong>MACD 1H:</strong> estaba en -0.132 esta mañana pero barras haciéndose más pequeñas → agotamiento bajista intradía</li>
+        <li><strong>Gatillo:</strong> vela de reversión 1H en zona + Fi CAD girando positivo + histograma 1H reduciendo → ejecutar LONG</li>
+      </ul>
+      <div class="callout green" style="margin-top:14px;"><div class="callout-label">Resultado</div><div class="callout-body">Los 3 timeframes del MACD alineados. Daily da sesgo, 4H confirma agotamiento en zona, 1H da el gatillo. Calidad A.</div></div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-head wait">
+      <div class="scenario-type">Escenario ESPERAR</div>
+      <div class="scenario-name">DVA perfecta pero MACD contradice — manos quietas</div>
+    </div>
+    <div class="scenario-body">
+      <p class="prose"><strong>Contexto:</strong> DVA 4H alcista, precio en zona de soporte, Fi neutral. Todo parece bien para un LONG.</p>
+      <ul class="scenario-steps">
+        <li><strong>MACD 1H:</strong> histograma en -0.35 y CRECIENDO en negativo → barras cada vez más rojas</li>
+        <li>Esto significa que el momentum bajista se está <strong>ACELERANDO</strong>, no agotando</li>
+        <li>Aunque DVA diga alcista, entrar ahora es nadar contra el momentum actual</li>
+        <li><strong>Decisión:</strong> esperar a que las barras rojas empiecen a reducirse antes de ejecutar</li>
+      </ul>
+      <div class="callout amber" style="margin-top:14px;"><div class="callout-label">Por qué esperar</div><div class="callout-body">El MACD es el último filtro. Si contradice con barras creciendo en tu contra, no ejecutas aunque todo lo demás esté verde. Perder una entrada es mejor que entrar mal posicionado.</div></div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-head short">
+      <div class="scenario-type">Escenario SHORT</div>
+      <div class="scenario-name">NZDUSD — Rebote agotándose en resistencia DVA</div>
+    </div>
+    <div class="scenario-body">
+      <p class="prose"><strong>Contexto:</strong> NZDUSD rebote alcista en W-DVAH ~0.5900. DVA trimestral y mensual bajistas. Escenario CMP.</p>
+      <ul class="scenario-steps">
+        <li><strong>MACD Daily:</strong> bajo cero, pendiente bajista → sesgo SHORT confirmado</li>
+        <li><strong>MACD 4H:</strong> histograma reduciendo barras verdes en zona resistencia → rebote alcista agotándose</li>
+        <li><strong>MACD 1H:</strong> cruce bajista MACD/Signal exactamente en la resistencia W-DVAH → gatillo SHORT</li>
+        <li><strong>Vela:</strong> rechazo en W-DVAH + vela bajista 1H → ejecutar SHORT</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PANEL 4 — DIVERGENCIAS -->
+<!-- ════════════════════════════════════════════ -->
+<div class="panel" id="p4">
+  <div class="sec-tag">Sección IV</div>
+  <h2 class="sec-title"><em>Divergencias</em> regulares</h2>
+  <p class="sec-lead">Cuando precio y MACD se mueven en direcciones opuestas. Una de las señales más potentes — el momentum no confirma el precio.</p>
+
+  <h3 class="h3">¿Por qué ocurren?</h3>
+  <p class="prose">Imagina el mercado cayendo. En la primera caída, los vendedores empujan con fuerza — el MACD baja mucho. En la segunda caída, el precio llega más bajo pero hay <strong>menos vendedores participando</strong>. El MACD no llega tan abajo porque hubo menos presión. Esa discrepancia entre precio y momentum es la divergencia.</p>
+
+  <div class="div-pair">
+    <div class="div-card alc">
+      <div class="div-type">Divergencia alcista regular</div>
+      <div class="div-title">Precio baja más · MACD baja menos</div>
+      <div class="div-body">Precio forma mínimo más bajo. MACD forma mínimo más alto. Los vendedores pierden presión en cada nueva caída. Señal de posible giro alcista.</div>
+      <div class="div-signal">Buscar LONG en zona soporte DVA</div>
+    </div>
+    <div class="div-card baj">
+      <div class="div-type">Divergencia bajista regular</div>
+      <div class="div-title">Precio sube más · MACD sube menos</div>
+      <div class="div-body">Precio forma máximo más alto. MACD forma máximo más bajo. Los compradores pierden presión en cada nueva subida. Señal de posible giro bajista.</div>
+      <div class="div-signal">Buscar SHORT en zona resistencia DVA</div>
+    </div>
+  </div>
+
+  <div class="chart-box">
+    <div class="chart-label">Divergencia alcista regular — precio en nuevos mínimos, MACD no confirma</div>
+    <canvas id="c3" height="190"></canvas>
+    <p class="chart-note">El precio forma un mínimo más bajo (caída mayor) pero el histograma MACD forma un mínimo menos pronunciado. La presión vendedora se agota a pesar de los nuevos mínimos del precio.</p>
+  </div>
+
+  <div class="chart-box">
+    <div class="chart-label">Divergencia bajista regular — precio en nuevos máximos, MACD no confirma</div>
+    <canvas id="c4" height="190"></canvas>
+    <p class="chart-note">El precio sube a un nuevo máximo pero el histograma MACD no alcanza el nivel anterior. Los compradores pierden impulso — señal de posible techo y giro bajista.</p>
+  </div>
+
+  <h3 class="h3">Cómo validarla en MATVARD</h3>
+  <p class="prose">Una divergencia sola <strong>nunca es suficiente</strong> para entrar. Necesita confluencia con el contexto completo:</p>
+
+  <table class="tbl">
+    <thead><tr><th>#</th><th>Condición</th><th>Por qué es necesaria</th></tr></thead>
+    <tbody>
+      <tr><td>01</td><td><strong>Zona DVA alineada</strong></td><td>La divergencia en soporte DVA es mucho más potente. Sin zona, pierde contexto estructural.</td></tr>
+      <tr><td>02</td><td><strong>Timeframe relevante</strong></td><td>Una divergencia en 4H o Daily vale mucho más que en 15min. A mayor TF, mayor validez.</td></tr>
+      <tr><td>03</td><td><strong>Vela de confirmación</strong></td><td>Espera siempre un martillo, envolvente o pin bar antes de ejecutar. La divergencia avisa, la vela confirma.</td></tr>
+      <tr><td>04</td><td><strong>Fi no contradice</strong></td><td>Si el indicador Fi sigue muy en contra, la divergencia puede tardar en resolverse — esperar normalización.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout red"><div class="callout-label">Error más común</div><div class="callout-body">Entrar en cuanto aparece la divergencia, sin esperar confirmación. El mercado puede mantener la divergencia durante muchas velas antes de girar. El precio puede seguir bajando mientras el MACD diverge. <strong>Siempre espera la vela de confirmación en tu timeframe de entrada.</strong></div></div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PANEL 5 — OCULTAS -->
+<!-- ════════════════════════════════════════════ -->
+<div class="panel" id="p5">
+  <div class="sec-tag">Sección V</div>
+  <h2 class="sec-title">Divergencias <em>ocultas</em></h2>
+  <p class="sec-lead">Señalan continuación de tendencia, no cambio. Se llaman ocultas porque hay que buscarlas — no saltan a la vista como las regulares.</p>
+
+  <div class="pq">
+    <div class="pq-text">Si las regulares dicen cuándo el mercado puede girar, las ocultas dicen cuándo quiere continuar. En escenarios FA alcista, las ocultas son tu mejor aliado.</div>
+    <div class="pq-cite">Divergencias ocultas — MATVARD</div>
+  </div>
+
+  <h3 class="h3">La lógica detrás</h3>
+  <p class="prose">En una tendencia alcista, el precio hace pullbacks cada vez menos profundos (mínimos más altos). Si en uno de esos pullbacks el MACD baja <em>más</em> que en el anterior, está "exagerando" la corrección — el indicador es más pesimista que el precio. Eso confirma que la tendencia tiene <strong>más fuerza de la que parece</strong>.</p>
+
+  <div class="div-pair">
+    <div class="div-card oalc">
+      <div class="div-type">Oculta alcista — continuación</div>
+      <div class="div-title">Precio mínimo más alto · MACD mínimo más bajo</div>
+      <div class="div-body">En tendencia alcista: pullback poco profundo (precio aguanta). MACD baja más que en pullback anterior. Los compradores siguen en control real.</div>
+      <div class="div-signal">LONG en pullback dentro de tendencia FA alcista</div>
+    </div>
+    <div class="div-card obaj">
+      <div class="div-type">Oculta bajista — continuación</div>
+      <div class="div-title">Precio máximo más bajo · MACD máximo más alto</div>
+      <div class="div-body">En tendencia bajista: rebote poco profundo (precio no recupera). MACD sube más que en rebote anterior. Los vendedores siguen en control real.</div>
+      <div class="div-signal">SHORT en rebote dentro de tendencia bajista</div>
+    </div>
+  </div>
+
+  <div class="chart-box">
+    <div class="chart-label">Divergencia oculta alcista — pullback superficial, MACD exagera la corrección</div>
+    <canvas id="c5" height="190"></canvas>
+    <p class="chart-note">El precio aguanta bien en el pullback (mínimo más alto), pero el MACD baja más. La tendencia alcista tiene más fuerza de lo aparente — señal de alta calidad para entrar LONG en el pullback.</p>
+  </div>
+
+  <h3 class="h3">Regular vs Oculta — comparativa completa</h3>
+  <table class="tbl">
+    <thead><tr><th>Característica</th><th>Regular</th><th>Oculta</th></tr></thead>
+    <tbody>
+      <tr><td>Señal</td><td>Cambio de tendencia</td><td>Continuación de tendencia</td></tr>
+      <tr><td>Alcista: ves en precio</td><td>Mínimo más bajo</td><td>Mínimo más alto (pullback superficial)</td></tr>
+      <tr><td>Alcista: ves en MACD</td><td>Mínimo más alto</td><td>Mínimo más bajo</td></tr>
+      <tr><td>Bajista: ves en precio</td><td>Máximo más alto</td><td>Máximo más bajo (rebote débil)</td></tr>
+      <tr><td>Bajista: ves en MACD</td><td>Máximo más bajo</td><td>Máximo más alto</td></tr>
+      <tr><td>Cuándo usar</td><td>En extremos contra la tendencia</td><td>En pullbacks a favor de la tendencia</td></tr>
+      <tr class="hl"><td>Fiabilidad en escenario FA</td><td>Media — va contra el sesgo</td><td>Alta — va con el sesgo</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout green"><div class="callout-label">Cuándo usar cada una en MATVARD</div><div class="callout-body"><strong>Regular:</strong> úsala para anticipar giros. Precio en extremo + DVA como soporte/resistencia + divergencia regular = posible entrada de cambio de tendencia. Siempre espera confirmación con vela.<br><br><strong>Oculta:</strong> úsala en escenarios FA cuando el sesgo es claro y buscas entrar en el pullback. Si Daily y 4H son alcistas y aparece divergencia oculta alcista en el pullback en zona DVA, es una entrada de <strong>calidad A máxima</strong>.</div></div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PANEL 6 — TEMPORALIDADES -->
+<!-- ════════════════════════════════════════════ -->
+<div class="panel" id="p6">
+  <div class="sec-tag">Sección VI</div>
+  <h2 class="sec-title">Qué temporalidad mirar en <em>swing</em></h2>
+  <p class="sec-lead">Tienes 4 ventanas abiertas y cada MACD dice algo diferente. El problema no es el indicador — es que estás mirando todos con el mismo rol. No lo tienen.</p>
+
+  <div class="pq">
+    <div class="pq-text">Cada temporalidad responde a una pregunta diferente. Confundirlas es el error más común en el análisis multitemporal.</div>
+    <div class="pq-cite">Análisis MTF — MATVARD</div>
+  </div>
+
+  <h3 class="h3">Los 3 roles fijos — nunca cambian</h3>
+
+  <div class="mtf-flow">
+    <div class="mtf-step sesgo">
+      <div class="mtf-role">Sesgo</div>
+      <div class="mtf-tf">TF mayor</div>
+      <div class="mtf-desc">¿La tendencia macro me favorece? Solo mira dirección general — sobre o bajo cero. No analices barras individuales.</div>
+    </div>
+    <div class="mtf-sep">→</div>
+    <div class="mtf-step conf">
+      <div class="mtf-role">Confirmación</div>
+      <div class="mtf-tf">TF medio</div>
+      <div class="mtf-desc">¿El pullback se agota en mi zona? Histograma reduciéndose en contra de mi trade = agotamiento.</div>
+    </div>
+    <div class="mtf-sep">→</div>
+    <div class="mtf-step gat">
+      <div class="mtf-role">Gatillo</div>
+      <div class="mtf-tf">TF menor</div>
+      <div class="mtf-desc">¿El momentum ya giró aquí? Histograma verde creciendo o cruce MACD/Signal. Ejecuto solo aquí.</div>
+    </div>
+  </div>
+
+  <div class="steps-nav">
+    <button class="step-pill on" onclick="step('s6','s6a',this)">Swing largo (días)</button>
+    <button class="step-pill"    onclick="step('s6','s6b',this)">Swing corto (horas)</button>
+    <button class="step-pill"    onclick="step('s6','s6c',this)">CADJPY — tu caso</button>
+  </div>
+
+  <div class="step-panel on" id="s6a">
+    <table class="tbl">
+      <thead><tr><th>TF</th><th>Rol</th><th>Qué miras en el MACD</th><th>Cuándo</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge bb">Daily</span></td><td>Sesgo</td><td>¿Sobre o bajo cero? ¿Pendiente al alza? No mires barras individuales — solo la tendencia general.</td><td>Al inicio del día, una vez</td></tr>
+        <tr><td><span class="badge bg">4H</span></td><td>Confirmación</td><td>¿Histograma reduciendo barras en contra de mi trade? Busco que el pullback pierda fuerza en mi zona.</td><td>Cuando el precio llega a tu zona</td></tr>
+        <tr><td><span class="badge ba">1H</span></td><td>Gatillo</td><td>¿Histograma girando positivo? ¿Cruce MACD/Signal? Aquí decido el segundo exacto de entrada.</td><td>Solo si sesgo y confirmación están bien</td></tr>
+      </tbody>
+    </table>
+    <div class="callout green"><div class="callout-label">Resumen swing largo</div><div class="callout-body">Daily = dirección · 4H = agotamiento en zona · 1H = gatillo. Si los tres apuntan igual = Calidad A. Si Daily contradice = Calidad B como máximo.</div></div>
+  </div>
+
+  <div class="step-panel" id="s6b">
+    <table class="tbl">
+      <thead><tr><th>TF</th><th>Rol</th><th>Qué miras en el MACD</th><th>Cuándo</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge bb">4H</span></td><td>Sesgo</td><td>¿Sobre o bajo cero? ¿El momentum 4H me favorece en la dirección del trade?</td><td>Al inicio, una vez</td></tr>
+        <tr><td><span class="badge bg">1H</span></td><td>Confirmación</td><td>¿Histograma reduciendo en contra de mi trade en la zona de interés?</td><td>Cuando precio llega a zona</td></tr>
+        <tr><td><span class="badge ba">15min</span></td><td>Gatillo</td><td>¿Cruce o histograma girando a mi favor exactamente en la zona? Aquí ejecuto.</td><td>Solo si los anteriores OK</td></tr>
+      </tbody>
+    </table>
+    <div class="callout green"><div class="callout-label">Resumen swing corto</div><div class="callout-body">Todo se desplaza un escalón abajo. 4H = sesgo · 1H = confirmación · 15min = gatillo.</div></div>
+  </div>
+
+  <div class="step-panel" id="s6c">
+    <div class="scenario">
+      <div class="scenario-head long">
+        <div class="scenario-type">Tu caso práctico ahora mismo</div>
+        <div class="scenario-name">CADJPY Largo Swing — Lectura de cada MACD</div>
+      </div>
+      <div class="scenario-body">
+        <ul class="scenario-steps">
+          <li><strong>Daily (sesgo):</strong> MACD sobre cero, pendiente alcista. Tendencia desde 111.78 intacta. <span class="badge bg">Sesgo LONG correcto</span></li>
+          <li><strong>4H (confirmación — el CLAVE ahora):</strong> el pullback desde 117 tiene barras rojas. Lo que esperas es que esas barras se hagan más pequeñas mientras el precio está entre 114.47–115.00. Eso = pullback agotándose en tu zona.</li>
+          <li><strong>1H (gatillo):</strong> estaba en -0.132 esta mañana. Cuando las barras rojas se achiquen + vela de reversión + Fi CAD girando → ese es tu momento. No antes.</li>
+          <li><strong>15min:</strong> <span class="badge br">No lo uses para decidir si el trade es bueno.</span> Solo para afinar el segundo de entrada. Normal que siga bajista mientras esperas el giro del 1H.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout red"><div class="callout-label">El error que no debes cometer</div><div class="callout-body">Mirar el MACD del 15min cayendo y pensar que el trade no vale. El 15min bajista mientras el Daily y 4H están bien es completamente normal — el 15min es solo el gatillo final, no el árbitro del trade.</div></div>
+  </div>
+
+  <div class="divider"></div>
+  <h3 class="h3">Referencia rápida — cuándo usar cada TF</h3>
+  <table class="tbl">
+    <thead><tr><th>Tipo de swing</th><th><span class="badge bb">Sesgo</span></th><th><span class="badge bg">Confirmación</span></th><th><span class="badge ba">Gatillo</span></th></tr></thead>
+    <tbody>
+      <tr><td>Swing largo (días–semanas)</td><td>Weekly / Daily</td><td>4H</td><td>1H</td></tr>
+      <tr><td>Swing medio (varios días)</td><td>Daily</td><td>4H</td><td>1H</td></tr>
+      <tr><td>Swing corto (horas–días)</td><td>4H</td><td>1H</td><td>15min</td></tr>
+      <tr class="hl"><td>CADJPY (tu caso)</td><td>Daily ✓</td><td>4H — vigilar ahora</td><td>1H — gatillo</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout purple"><div class="callout-label">La regla maestra para no liarte nunca</div><div class="callout-body">TF mayor contradice → Calidad B/C como máximo, no operas con convicción plena.<br>TF medio sin confirmar agotamiento → esperas aunque el mayor esté perfecto.<br>TF menor sin gatillo → tienes el setup listo pero no ejecutas. Paciencia.<br><strong>Los 3 alineados = Calidad A. Tamaño de posición completo.</strong></div></div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PANEL 7 — TEST -->
+<!-- ════════════════════════════════════════════ -->
+<div class="panel" id="p7">
+  <div class="sec-tag">Sección VII</div>
+  <h2 class="sec-title">Test de <em>comprensión</em></h2>
+  <p class="sec-lead">5 preguntas. Cada respuesta viene con la explicación completa de por qué es correcta.</p>
+
+  <div class="prog-bar"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+
+  <div class="quiz-wrap" id="qbox">
+    <div class="quiz-counter" id="qnum">Pregunta 1 / 5</div>
+    <div class="quiz-q" id="qtext"></div>
+    <div id="qopts"></div>
+    <div class="q-exp" id="qexp"></div>
+    <div class="quiz-footer">
+      <div></div>
+      <button class="btn btn-green" id="qnext" onclick="nextQ()" style="display:none;">Siguiente →</button>
+    </div>
+  </div>
+
+  <div class="quiz-wrap" id="qres" style="display:none;">
+    <div class="quiz-result">
+      <div class="result-num" id="rscore"></div>
+      <div class="result-sub">respuestas correctas</div>
+      <div class="result-msg" id="rmsg"></div>
+      <button class="btn btn-green" onclick="resetQ()">Repetir test</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="site-footer">
+  <div class="footer-brand">MATVARD · Guía MACD · Conquer Finance · 2026</div>
+  <a href="../index.html" class="footer-link">← Volver al hub</a>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ── TABS ──
+function tab(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  btn.classList.add('on');
+  const builders={p1:buildC1,p2:buildC2,p4:buildC3C4,p5:buildC5,p7:initQ};
+  if(builders[id]&&!window['_b'+id]){builders[id]();window['_b'+id]=true;}
+}
+
+// ── STEPS ──
+function step(group,id,btn){
+  document.querySelectorAll('#p'+group.slice(1)+' .step-panel, #'+group+' ~ * .step-panel').forEach(()=>{});
+  const parent=btn.closest('.panel')||btn.closest('[id]');
+  parent.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('on'));
+  parent.querySelectorAll('.step-pill').forEach(b=>b.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  btn.classList.add('on');
+  const builders={s2b:buildC2,c2b:null,s2c:buildC2b};
+  // build chart if needed
+  if(id==='s2b'&&!window._bc2){buildC2();window._bc2=true;}
+  if(id==='s2c'&&!window._bc2b){buildC2b();window._bc2b=true;}
+}
+
+// ── TRADINGVIEW EXACT COLORS ──
+// Histograma: verde sólido (#26A69A) positivo creciendo, verde oscuro (#B2DFDB) positivo menguando
+//             rojo sólido (#EF5350) negativo creciendo, rojo claro (#FFCDD2) negativo menguando
+// MACD line: azul #2196F3 · Signal: naranja #FF6D00
+// Fondo panel: #131722 · Grid: rgba(255,255,255,0.06) · Labels: #787B86
+
+const TV = {
+  bg:      '#131722',
+  bg2:     '#1E222D',
+  grid:    'rgba(255,255,255,0.06)',
+  label:   '#787B86',
+  macd:    '#2196F3',
+  signal:  '#FF6D00',
+  hGP:     '#26A69A', // histograma verde positivo creciendo
+  hGN:     '#B2DFDB', // histograma verde positivo menguando
+  hRP:     '#EF5350', // histograma rojo negativo creciendo (más negativo)
+  hRN:     '#FFCDD2', // histograma rojo negativo menguando
+  candleG: '#26A69A', // vela alcista
+  candleR: '#EF5350', // vela bajista
+  ema12:   '#E91E63', // pink — EMA rápida TV style
+  ema26:   '#FF9800', // naranja — EMA lenta TV style
+  price:   '#D1D4DC', // color precio neutro
+};
+
+const ema=(d,p)=>{let e=[d[0]],k=2/(p+1);for(let i=1;i<d.length;i++)e.push(+(d[i]*k+e[i-1]*(1-k)).toFixed(4));return e;};
+
+// Calcula colores TV del histograma: compara barra actual con anterior
+function tvHistColors(hist){
+  return hist.map((v,i)=>{
+    const prev = i===0 ? v : hist[i-1];
+    if(v>=0) return v >= prev ? TV.hGP : TV.hGN;
+    else      return v <= prev ? TV.hRP : TV.hRN;
+  });
+}
+
+// Genera datos de velas sintéticas a partir de precios de cierre
+function makeBars(closes){
+  return closes.map((c,i)=>{
+    const prev = closes[i-1]||c;
+    const isUp = c >= prev;
+    const body = Math.abs(c-prev)*0.6 + 0.15;
+    const o = isUp ? c - body : c + body;
+    const h = Math.max(c,o) + body*0.4;
+    const l = Math.min(c,o) - body*0.4;
+    return {o,h,l,c,up:isUp};
+  });
+}
+
+const L = n => Array.from({length:n},(_,i)=>'B'+(i+1));
+
+// Opciones base con fondo TV
+function tvBase(scalesExtra){
+  return {
+    responsive:true,
+    animation:{duration:400},
+    plugins:{
+      legend:{labels:{color:TV.label,font:{size:10},boxWidth:10,padding:14}},
+      tooltip:{
+        backgroundColor:'#1E222D',
+        borderColor:'rgba(255,255,255,0.1)',
+        borderWidth:1,
+        titleColor:TV.label,
+        bodyColor:'#D1D4DC',
+      }
+    },
+    scales:scalesExtra
+  };
+}
+
+function tvAx(opts={}){
+  return {
+    ticks:{color:TV.label,font:{size:10},...(opts.ticks||{})},
+    grid:{color:TV.grid,...(opts.grid||{})},
+    border:{color:'rgba(255,255,255,0.1)'},
+    ...opts
+  };
+}
+
+// Plugin para pintar fondo oscuro del canvas
+const bgPlugin = {
+  id:'tvbg',
+  beforeDraw(chart){
+    const ctx=chart.canvas.getContext('2d');
+    ctx.save();
+    ctx.fillStyle=TV.bg;
+    ctx.fillRect(0,0,chart.width,chart.height);
+    ctx.restore();
+  }
+};
+Chart.register(bgPlugin);
+
+// Dibuja candlesticks reales encima de un chart de barras vacío
+function drawCandles(chartInst, bars, yAxisId){
+  const meta = chartInst.getDatasetMeta(0);
+  const ctx = chartInst.canvas.getContext('2d');
+  const yScale = chartInst.scales[yAxisId||'y'];
+  const numBars = bars.length;
+
+  ctx.save();
+  bars.forEach((bar,i)=>{
+    const el = meta.data[i];
+    if(!el) return;
+    const x = el.x;
+    const bw = Math.max(4, (el.width||8) * 0.7);
+    const yO = yScale.getPixelForValue(bar.o);
+    const yC = yScale.getPixelForValue(bar.c);
+    const yH = yScale.getPixelForValue(bar.h);
+    const yL = yScale.getPixelForValue(bar.l);
+    const color = bar.up ? TV.candleG : TV.candleR;
+
+    // Mecha
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, yH);
+    ctx.lineTo(x, yL);
+    ctx.stroke();
+
+    // Cuerpo
+    ctx.fillStyle = color;
+    const top = Math.min(yO,yC);
+    const h = Math.max(Math.abs(yO-yC), 1.5);
+    ctx.fillRect(x - bw/2, top, bw, h);
+  });
+  ctx.restore();
+}
+
+// ── CHART 1: Precio + MACD completo (panel doble) ──
+function buildC1(){
+  const price=[100,101,103,102,105,104,107,106,109,111,110,112,114,113,116,118,117,119,121,120];
+  const e12=ema(price,12), e26=ema(price,26);
+  const macd=price.map((_,i)=>+(e12[i]-e26[i]).toFixed(3));
+  const sig=ema(macd,9);
+  const hist=macd.map((v,i)=>+(v-sig[i]).toFixed(3));
+  const bars=makeBars(price);
+  const hColors=tvHistColors(hist);
+
+  const chart=new Chart(document.getElementById('c1'),{
+    type:'bar',
+    data:{
+      labels:L(price.length),
+      datasets:[
+        // Panel precio — barra invisible como soporte para candlesticks
+        {type:'bar',label:'_hidden',data:price.map(()=>0),backgroundColor:'transparent',borderColor:'transparent',yAxisID:'yp',barPercentage:0.8},
+        {type:'line',label:'EMA 12',data:e12,borderColor:TV.ema12,pointRadius:0,borderWidth:1.5,yAxisID:'yp'},
+        {type:'line',label:'EMA 26',data:e26,borderColor:TV.ema26,pointRadius:0,borderWidth:1.5,yAxisID:'yp'},
+        // Panel MACD
+        {type:'bar',  label:'Histograma', data:hist, backgroundColor:hColors, borderColor:hColors, borderWidth:0, yAxisID:'ym', barPercentage:0.85},
+        {type:'line', label:'MACD',       data:macd, borderColor:TV.macd,   pointRadius:0,borderWidth:1.5,yAxisID:'ym'},
+        {type:'line', label:'Signal',     data:sig,  borderColor:TV.signal, pointRadius:0,borderWidth:1.5,yAxisID:'ym'},
+      ]
+    },
+    options:{
+      ...tvBase({
+        yp:{position:'left',  ...tvAx(), min:98, max:123},
+        ym:{position:'right', ...tvAx({grid:{drawOnChartArea:false}}), },
+        x:{...tvAx(), ticks:{color:TV.label,font:{size:9},maxRotation:0}},
+      }),
+      plugins:{...tvBase({}).plugins, legend:{labels:{
+        filter:item=>item.label!=='_hidden',
+        color:TV.label,font:{size:10},boxWidth:10,padding:14
+      }}},
+    },
+    plugins:[{
+      id:'candles1',
+      afterDatasetsDraw(chart){
+        const ds=chart.getDatasetMeta(0);
+        if(ds.hidden)return;
+        drawCandles(chart,bars,'yp');
+      }
+    }]
+  });
+}
+
+// ── CHART 2: MACD + Signal (cruces) ──
+function buildC2(){
+  if(!document.getElementById('c2'))return;
+  const macd=[0,.05,.18,.42,.72,.98,.92,.68,.42,.18,-.02,-.22,-.48,-.70,-.58,-.35,-.18,.02,.12,.22];
+  const sig=ema(macd,9);
+  const hist=macd.map((v,i)=>+(v-sig[i]).toFixed(3));
+  const hColors=tvHistColors(hist);
+  new Chart(document.getElementById('c2'),{
+    type:'bar',
+    data:{labels:L(macd.length),datasets:[
+      {type:'bar', label:'Histograma', data:hist, backgroundColor:hColors, borderColor:hColors, borderWidth:0, barPercentage:0.85},
+      {type:'line',label:'MACD',   data:macd, borderColor:TV.macd,   pointRadius:0,borderWidth:1.5},
+      {type:'line',label:'Signal', data:sig,  borderColor:TV.signal, pointRadius:0,borderWidth:1.5},
+    ]},
+    options:tvBase({y:{...tvAx()},x:{...tvAx(),ticks:{color:TV.label,font:{size:9},maxRotation:0}}})
+  });
+}
+
+// ── CHART 2b: Solo histograma agotamiento ──
+function buildC2b(){
+  if(!document.getElementById('c2b'))return;
+  const hist=[-.05,-.12,-.25,-.42,-.55,-.60,-.52,-.40,-.28,-.15,-.05,.04,.10,.08,.04,.01];
+  const hColors=tvHistColors(hist);
+  new Chart(document.getElementById('c2b'),{
+    type:'bar',
+    data:{labels:L(hist.length),datasets:[
+      {label:'Histograma',data:hist,backgroundColor:hColors,borderColor:hColors,borderWidth:0,barPercentage:0.85},
+    ]},
+    options:tvBase({y:{...tvAx()},x:{...tvAx(),ticks:{color:TV.label,font:{size:9},maxRotation:0}}})
+  });
+}
+
+// ── CHARTS 3+4: Divergencias regulares ──
+function buildC3C4(){
+  // Div alcista regular: precio baja más, MACD baja menos
+  const priceA=[114.8,113.2,111.0,108.5,109.8,107.2,104.8,106.0,103.2,105.5,108.2,110.8];
+  const macdA= [-0.048,-0.038,-0.052,-0.042,-0.055,-0.038,-0.046,-0.028,-0.022,-0.010,0.005,0.018];
+  const sigA=ema(macdA,3);
+  const histA=macdA.map((v,i)=>+(v-sigA[i]).toFixed(4));
+  const hcA=tvHistColors(histA);
+  const barsA=makeBars(priceA);
+
+  // Anotaciones de divergencia: puntos marcados
+  const ptA1=6, ptA2=8; // índices de los dos mínimos del precio
+  const mpA1=6, mpA2=8; // índices de los dos mínimos del MACD
+
+  const c3=new Chart(document.getElementById('c3'),{
+    type:'bar',
+    data:{labels:priceA.map((_,i)=>{
+      const h=['','','','','','','','','','','',''];
+      h[ptA1]='Mín 1'; h[ptA2]='Mín 2';
+      return h[i]||'';
+    }),datasets:[
+      {type:'bar',  label:'_hidden', data:priceA.map(()=>0), backgroundColor:'transparent',borderColor:'transparent',yAxisID:'yp',barPercentage:0.8},
+      {type:'bar',  label:'Histograma MACD', data:histA, backgroundColor:hcA, borderColor:hcA, borderWidth:0, yAxisID:'ym', barPercentage:0.85},
+      {type:'line', label:'MACD',  data:macdA, borderColor:TV.macd,   pointRadius:0,borderWidth:1.5,yAxisID:'ym'},
+      {type:'line', label:'Signal',data:sigA,  borderColor:TV.signal, pointRadius:0,borderWidth:1.5,yAxisID:'ym'},
+      // Puntos marcados en precio
+      {type:'line', label:'Mínimos precio', data:priceA.map((v,i)=>(i===ptA1||i===ptA2)?v:null),
+       borderColor:'rgba(0,0,0,0)',pointRadius:priceA.map((_,i)=>(i===ptA1||i===ptA2)?7:0),
+       pointBackgroundColor:TV.candleR,pointBorderColor:'#fff',pointBorderWidth:1.5,yAxisID:'yp',showLine:false},
+      // Línea de tendencia precio (bajista)
+      {type:'line', label:'Tendencia precio', data:priceA.map((_,i)=>(i===ptA1||i===ptA2)?priceA[i]:null),
+       borderColor:TV.candleR,borderWidth:1,borderDash:[4,3],pointRadius:0,yAxisID:'yp',spanGaps:true},
+      // Puntos en MACD
+      {type:'line', label:'Mínimos MACD', data:macdA.map((v,i)=>(i===mpA1||i===mpA2)?v:null),
+       borderColor:'rgba(0,0,0,0)',pointRadius:macdA.map((_,i)=>(i===mpA1||i===mpA2)?7:0),
+       pointBackgroundColor:TV.candleG,pointBorderColor:'#fff',pointBorderWidth:1.5,yAxisID:'ym',showLine:false},
+      // Línea tendencia MACD (alcista)
+      {type:'line', label:'Tendencia MACD', data:macdA.map((v,i)=>(i===mpA1||i===mpA2)?v:null),
+       borderColor:TV.candleG,borderWidth:1,borderDash:[4,3],pointRadius:0,yAxisID:'ym',spanGaps:true},
+    ]},
+    options:{
+      ...tvBase({
+        yp:{position:'left',...tvAx(),min:101,max:117},
+        ym:{position:'right',...tvAx({grid:{drawOnChartArea:false}})},
+        x:{...tvAx(),ticks:{color:TV.label,font:{size:9},maxRotation:0}},
+      }),
+      plugins:{...tvBase({}).plugins,legend:{labels:{
+        filter:item=>!['_hidden','Mínimos precio','Tendencia precio','Mínimos MACD','Tendencia MACD'].includes(item.label),
+        color:TV.label,font:{size:10},boxWidth:10,padding:14
+      }}},
+    },
+    plugins:[{id:'c3c',afterDatasetsDraw(ch){drawCandles(ch,barsA,'yp');}}]
+  });
+
+  // Div bajista regular: precio sube más, MACD sube menos
+  const priceB=[104.0,106.2,109.5,113.2,111.0,115.8,119.5,117.2,122.0,119.5,116.0,112.5];
+  const macdB= [0.035,0.055,0.085,0.112,0.088,0.105,0.098,0.080,0.088,0.065,0.035,0.012];
+  const sigB=ema(macdB,3);
+  const histB=macdB.map((v,i)=>+(v-sigB[i]).toFixed(4));
+  const hcB=tvHistColors(histB);
+  const barsB=makeBars(priceB);
+  const ptB1=3, ptB2=8;
+
+  new Chart(document.getElementById('c4'),{
+    type:'bar',
+    data:{labels:L(priceB.length),datasets:[
+      {type:'bar',  label:'_hidden',          data:priceB.map(()=>0), backgroundColor:'transparent',borderColor:'transparent',yAxisID:'yp',barPercentage:0.8},
+      {type:'bar',  label:'Histograma MACD',  data:histB, backgroundColor:hcB,borderColor:hcB,borderWidth:0,yAxisID:'ym',barPercentage:0.85},
+      {type:'line', label:'MACD',   data:macdB, borderColor:TV.macd,   pointRadius:0,borderWidth:1.5,yAxisID:'ym'},
+      {type:'line', label:'Signal', data:sigB,  borderColor:TV.signal, pointRadius:0,borderWidth:1.5,yAxisID:'ym'},
+      {type:'line', label:'Máximos precio', data:priceB.map((v,i)=>(i===ptB1||i===ptB2)?v:null),
+       borderColor:'rgba(0,0,0,0)',pointRadius:priceB.map((_,i)=>(i===ptB1||i===ptB2)?7:0),
+       pointBackgroundColor:TV.candleG,pointBorderColor:'#fff',pointBorderWidth:1.5,yAxisID:'yp',showLine:false},
+      {type:'line', label:'Tendencia precio', data:priceB.map((_,i)=>(i===ptB1||i===ptB2)?priceB[i]:null),
+       borderColor:TV.candleG,borderWidth:1,borderDash:[4,3],pointRadius:0,yAxisID:'yp',spanGaps:true},
+      {type:'line', label:'Máximos MACD', data:macdB.map((v,i)=>(i===ptB1||i===ptB2)?v:null),
+       borderColor:'rgba(0,0,0,0)',pointRadius:macdB.map((_,i)=>(i===ptB1||i===ptB2)?7:0),
+       pointBackgroundColor:TV.candleR,pointBorderColor:'#fff',pointBorderWidth:1.5,yAxisID:'ym',showLine:false},
+      {type:'line', label:'Tendencia MACD', data:macdB.map((_,i)=>(i===ptB1||i===ptB2)?macdB[i]:null),
+       borderColor:TV.candleR,borderWidth:1,borderDash:[4,3],pointRadius:0,yAxisID:'ym',spanGaps:true},
+    ]},
+    options:{
+      ...tvBase({
+        yp:{position:'left',...tvAx(),min:102,max:125},
+        ym:{position:'right',...tvAx({grid:{drawOnChartArea:false}})},
+        x:{...tvAx(),ticks:{color:TV.label,font:{size:9},maxRotation:0}},
+      }),
+      plugins:{...tvBase({}).plugins,legend:{labels:{
+        filter:item=>!['_hidden','Máximos precio','Tendencia precio','Máximos MACD','Tendencia MACD'].includes(item.label),
+        color:TV.label,font:{size:10},boxWidth:10,padding:14
+      }}},
+    },
+    plugins:[{id:'c4c',afterDatasetsDraw(ch){drawCandles(ch,barsB,'yp');}}]
+  });
+}
+
+// ── CHART 5: Divergencia oculta alcista ──
+function buildC5(){
+  const price=[113.5,114.8,116.2,115.0,115.4,116.8,118.2,116.8,117.2,116.5,117.8,119.4];
+  const macd= [0.022,0.038,0.058,0.028,0.044,0.065,0.080,0.022,0.038,0.015,0.028,0.048];
+  const sig=ema(macd,3);
+  const hist=macd.map((v,i)=>+(v-sig[i]).toFixed(4));
+  const hc=tvHistColors(hist);
+  const bars=makeBars(price);
+  const ptP1=3,ptP2=9; // mínimos precio
+  const ptM1=3,ptM2=9; // mínimos macd
+
+  new Chart(document.getElementById('c5'),{
+    type:'bar',
+    data:{labels:L(price.length),datasets:[
+      {type:'bar',  label:'_hidden',         data:price.map(()=>0),backgroundColor:'transparent',borderColor:'transparent',yAxisID:'yp',barPercentage:0.8},
+      {type:'bar',  label:'Histograma MACD', data:hist,backgroundColor:hc,borderColor:hc,borderWidth:0,yAxisID:'ym',barPercentage:0.85},
+      {type:'line', label:'MACD',   data:macd,borderColor:TV.macd,  pointRadius:0,borderWidth:1.5,yAxisID:'ym'},
+      {type:'line', label:'Signal', data:sig, borderColor:TV.signal,pointRadius:0,borderWidth:1.5,yAxisID:'ym'},
+      // precio: mínimos marcados (precio más alto = oculta alcista)
+      {type:'line',label:'Mínimos precio',data:price.map((v,i)=>(i===ptP1||i===ptP2)?v:null),
+       borderColor:'rgba(0,0,0,0)',pointRadius:price.map((_,i)=>(i===ptP1||i===ptP2)?7:0),
+       pointBackgroundColor:TV.candleG,pointBorderColor:'#fff',pointBorderWidth:1.5,yAxisID:'yp',showLine:false},
+      {type:'line',label:'Tendencia precio (↑)',data:price.map((_,i)=>(i===ptP1||i===ptP2)?price[i]:null),
+       borderColor:TV.candleG,borderWidth:1.5,borderDash:[4,3],pointRadius:0,yAxisID:'yp',spanGaps:true},
+      // MACD: mínimos marcados (MACD más bajo = divergencia oculta)
+      {type:'line',label:'Mínimos MACD',data:macd.map((v,i)=>(i===ptM1||i===ptM2)?v:null),
+       borderColor:'rgba(0,0,0,0)',pointRadius:macd.map((_,i)=>(i===ptM1||i===ptM2)?7:0),
+       pointBackgroundColor:TV.candleR,pointBorderColor:'#fff',pointBorderWidth:1.5,yAxisID:'ym',showLine:false},
+      {type:'line',label:'Tendencia MACD (↓)',data:macd.map((_,i)=>(i===ptM1||i===ptM2)?macd[i]:null),
+       borderColor:TV.candleR,borderWidth:1.5,borderDash:[4,3],pointRadius:0,yAxisID:'ym',spanGaps:true},
+    ]},
+    options:{
+      ...tvBase({
+        yp:{position:'left',...tvAx(),min:112,max:121},
+        ym:{position:'right',...tvAx({grid:{drawOnChartArea:false}})},
+        x:{...tvAx(),ticks:{color:TV.label,font:{size:9},maxRotation:0}},
+      }),
+      plugins:{...tvBase({}).plugins,legend:{labels:{
+        filter:item=>!['_hidden','Mínimos precio','Mínimos MACD'].includes(item.label),
+        color:TV.label,font:{size:10},boxWidth:10,padding:14
+      }}},
+    },
+    plugins:[{id:'c5c',afterDatasetsDraw(ch){drawCandles(ch,bars,'yp');}}]
+  });
+}
+
+// ── QUIZ ──
+const Qs=[
+  {q:'El histograma muestra barras rojas haciéndose cada vez más pequeñas mientras el precio sigue bajando en tu zona DVA. ¿Qué significa en MATVARD?',
+   opts:['Señal de venta — el precio seguirá bajando con fuerza','El momentum bajista se está agotando — posible entrada LONG si DVA y Fi lo permiten','Esperar a que el histograma sea positivo antes de entrar','El indicador da señal errónea, ignorarlo'],
+   ans:1,exp:'El histograma con barras rojas reduciéndose es la señal de agotamiento bajista. En MATVARD no necesitas que el histograma sea positivo — solo que la presión vendedora esté perdiendo fuerza mientras el precio está en tu zona DVA. Esa reducción es tu confirmación para preparar la entrada LONG.'},
+  {q:'¿Cuál es la diferencia fundamental entre una divergencia regular y una divergencia oculta?',
+   opts:['No hay diferencia, ambas señalan lo mismo','La regular señala cambio de tendencia; la oculta señala continuación de tendencia','La oculta solo funciona en futuros, no en Forex','La regular es más fiable en todos los casos'],
+   ans:1,exp:'La regular va CONTRA la tendencia actual — señala que el precio puede girar. La oculta va A FAVOR de la tendencia — confirma que continuará. En un escenario FA alcista, una divergencia oculta alcista en el pullback es de Calidad A porque tanto la estructura DVA como el MACD confirman la misma dirección.'},
+  {q:'En un swing largo (días a semanas) en CADJPY, ¿qué temporalidad actúa como GATILLO de entrada?',
+   opts:['Weekly — para ver el sesgo macro de largo plazo','Daily — porque es donde está la tendencia principal','1H — donde ejecutas cuando el histograma gira a tu favor','15min — es el más preciso para afinar la entrada'],
+   ans:2,exp:'En swing largo: Daily = sesgo (solo miras dirección general), 4H = confirmación del agotamiento del pullback en zona, 1H = gatillo de entrada (donde ves que el histograma gira y ejecutas). El 15min solo sirve para afinar el segundo exacto pero no es el árbitro del trade.'},
+  {q:'DVA alcista en todos los TF, precio en zona, Fi normalizando. Pero el histograma 1H tiene barras rojas CRECIENDO. ¿Qué haces?',
+   opts:['Entras igualmente — DVA y Fi perfectos son suficientes','Reduces el tamaño a la mitad y entras cauteloso','Esperas a que las barras rojas empiecen a REDUCIRSE antes de ejecutar','Cambias a SHORT porque el MACD tiene más peso que la DVA'],
+   ans:2,exp:'El MACD con barras rojas creciendo significa que el momentum bajista se está acelerando — es exactamente lo contrario a lo que buscas. Aunque DVA y Fi estén perfectos, el MACD es el último filtro. Si te contradice con barras expandiéndose en tu contra, esperas. La paciencia aquí es parte del edge.'},
+  {q:'En la divergencia oculta alcista, ¿qué patrón específico observas?',
+   opts:['Precio hace mínimo más bajo, MACD hace mínimo más alto (como la regular)','Precio hace mínimo más ALTO (pullback poco profundo), MACD hace mínimo más BAJO','Precio y MACD hacen mínimos al mismo nivel simultáneamente','Precio sube rápido, MACD no reacciona'],
+   ans:1,exp:'En la oculta alcista: dentro de una tendencia alcista, el precio aguanta bien y hace un pullback poco profundo (mínimo más alto que el anterior). El MACD baja más que en el pullback previo — "exagera" la corrección. Eso confirma que la tendencia alcista tiene más fuerza de la que parece. Los compradores siguen en control real.'},
+];
+
+let qi=0,sc=0,ans=false;
+function initQ(){qi=0;sc=0;ans=false;renderQ();}
+function renderQ(){
+  ans=false;
+  const q=Qs[qi];
+  document.getElementById('qnum').textContent='Pregunta '+(qi+1)+' / '+Qs.length;
+  document.getElementById('prog').style.width=(qi/Qs.length*100)+'%';
+  document.getElementById('qtext').textContent=q.q;
+  const letters=['A','B','C','D'];
+  document.getElementById('qopts').innerHTML=q.opts.map((o,i)=>`<div class="q-opt" onclick="ansQ(${i})"><span class="q-letter">${letters[i]}</span><span>${o}</span></div>`).join('');
+  const exp=document.getElementById('qexp');exp.textContent='';exp.classList.remove('show');
+  const nxt=document.getElementById('qnext');nxt.style.display='none';nxt.textContent=qi<Qs.length-1?'Siguiente pregunta →':'Ver resultado';
+}
+function ansQ(i){
+  if(ans)return;ans=true;
+  const q=Qs[qi];
+  document.querySelectorAll('.q-opt').forEach((el,j)=>{
+    el.onclick=null;
+    if(j===q.ans)el.classList.add('correct');
+    else if(j===i&&i!==q.ans)el.classList.add('wrong');
+  });
+  if(i===q.ans)sc++;
+  const exp=document.getElementById('qexp');exp.textContent=q.exp;exp.classList.add('show');
+  document.getElementById('qnext').style.display='inline-block';
+}
+function nextQ(){
+  qi++;
+  document.getElementById('prog').style.width=(qi/Qs.length*100)+'%';
+  if(qi>=Qs.length){
+    document.getElementById('qbox').style.display='none';
+    const res=document.getElementById('qres');res.style.display='block';
+    const s=document.getElementById('rscore');
+    s.textContent=sc+'/'+Qs.length;
+    s.style.color=sc>=4?P.green:sc>=3?P.amber:P.red;
+    const msgs=['Repasa las secciones III y VI — son las más importantes para operar.','Buen inicio. Profundiza en divergencias ocultas y el rol de cada temporalidad.','Buen nivel. Aplica estos conceptos en tus próximos análisis DVA.','Perfecto — dominas el MACD según MATVARD. A aplicarlo en el CADJPY.'];
+    document.getElementById('rmsg').textContent=msgs[Math.min(3,Math.floor(sc/Qs.length*4))];
+  } else renderQ();
+}
+function resetQ(){qi=0;sc=0;ans=false;document.getElementById('qbox').style.display='block';document.getElementById('qres').style.display='none';renderQ();}
+
+window.addEventListener('load',()=>{buildC1();window._bp1=true;});
+</script>
+</body>
+</html>
