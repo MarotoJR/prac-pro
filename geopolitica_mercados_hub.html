@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geopolítica & Mercados — Hub Interactivo</title>
+<style>
+  :root {
+    --color-bg: #0f0f0f;
+    --color-bg2: #161616;
+    --color-bg3: #1e1e1e;
+    --color-border: rgba(255,255,255,0.08);
+    --color-border2: rgba(255,255,255,0.14);
+    --color-text: #e8e6df;
+    --color-text2: #9c9a92;
+    --color-text3: #6b6962;
+    --color-accent: #EF9F27;
+    --color-accent2: #BA7517;
+    --color-info: #378ADD;
+    --color-info-bg: rgba(55,138,221,0.12);
+    --color-danger: #E24B4A;
+    --color-danger-bg: rgba(226,75,74,0.12);
+    --color-success: #639922;
+    --color-success-bg: rgba(99,153,34,0.12);
+    --color-warning: #BA7517;
+    --color-warning-bg: rgba(186,117,23,0.12);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --font-sans: 'Syne', 'DM Sans', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-bg);
+    color: var(--color-text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* Google Fonts */
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  /* Header */
+  .header {
+    padding: 3rem 2rem 2rem;
+    border-bottom: 0.5px solid var(--color-border);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(239,159,39,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-label {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--color-accent);
+    margin-bottom: 10px;
+  }
+  .header h1 {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+  .header p {
+    font-size: 14px;
+    color: var(--color-text2);
+    max-width: 560px;
+    line-height: 1.65;
+  }
+  strong { font-weight: 600; color: var(--color-text); }
+
+  /* Main layout */
+  .hub { max-width: 860px; margin: 0 auto; padding: 2rem; }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 6px; margin-bottom: 1.5rem;
+    flex-wrap: wrap; padding-bottom: 1rem;
+    border-bottom: 0.5px solid var(--color-border);
+  }
+  .tab-btn {
+    font-size: 13px; font-weight: 500; padding: 7px 16px;
+    border-radius: 999px;
+    border: 0.5px solid var(--color-border2);
+    background: transparent; color: var(--color-text2);
+    cursor: pointer; transition: all 0.15s;
+    font-family: var(--font-sans);
+    letter-spacing: 0.01em;
+  }
+  .tab-btn:hover { background: var(--color-bg3); color: var(--color-text); }
+  .tab-btn.active {
+    background: var(--color-accent);
+    color: #0f0f0f;
+    border-color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  /* Panels */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .section-title {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--color-text3);
+    margin-bottom: 12px;
+  }
+
+  /* Intro card */
+  .intro-card {
+    background: var(--color-bg2);
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    border-left: 2px solid var(--color-accent);
+  }
+  .intro-card p { font-size: 14px; line-height: 1.65; color: var(--color-text2); }
+
+  /* Conflict cards */
+  .conflict-list { display: flex; flex-direction: column; gap: 10px; }
+  .conflict-card {
+    background: var(--color-bg2);
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 13px 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .conflict-card:hover { border-color: var(--color-border2); background: var(--color-bg3); }
+  .conflict-card.open { border-color: var(--color-accent2); }
+  .conflict-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .conflict-name { font-size: 14px; font-weight: 600; }
+  .conflict-badge {
+    font-size: 11px; font-weight: 600; padding: 3px 10px;
+    border-radius: 999px; white-space: nowrap; flex-shrink: 0;
+  }
+  .conflict-badge.alto { background: var(--color-danger-bg); color: var(--color-danger); }
+  .conflict-badge.medio { background: var(--color-warning-bg); color: var(--color-warning); }
+  .conflict-badge.bajo { background: var(--color-success-bg); color: var(--color-success); }
+  .conflict-detail {
+    display: none; margin-top: 12px; padding-top: 12px;
+    border-top: 0.5px solid var(--color-border);
+  }
+  .conflict-detail.open { display: block; }
+  .conflict-detail > p {
+    font-size: 13px; color: var(--color-text2);
+    line-height: 1.6; margin-bottom: 10px;
+  }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .detail-chip {
+    font-size: 12px; padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg3);
+    border: 0.5px solid var(--color-border);
+    color: var(--color-text2); line-height: 1.5;
+  }
+  .detail-chip strong {
+    color: var(--color-accent);
+    font-weight: 600; display: block; margin-bottom: 3px;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+
+  /* Asset grid */
+  .asset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px; margin-bottom: 1.25rem;
+  }
+  .asset-card {
+    background: var(--color-bg2);
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .asset-card:hover { border-color: var(--color-border2); background: var(--color-bg3); }
+  .asset-card.selected { border-color: var(--color-accent); background: var(--color-bg3); }
+  .asset-card .asset-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .asset-card .asset-sub { font-size: 12px; color: var(--color-text3); }
+
+  .impact-box {
+    background: var(--color-bg2);
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.1rem 1.25rem;
+    min-height: 90px;
+    border-left: 2px solid var(--color-info);
+  }
+  .impact-box .impact-title {
+    font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--color-text);
+  }
+  .impact-box .impact-content {
+    font-size: 13px; line-height: 1.65; color: var(--color-text2);
+  }
+
+  /* Flow */
+  .flow { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+  .flow-step { display: flex; align-items: center; gap: 10px; }
+  .flow-box {
+    flex: 1; font-size: 13px; padding: 10px 14px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg2);
+    border: 0.5px solid var(--color-border);
+    line-height: 1.4;
+  }
+  .flow-box .fb-title { font-weight: 600; font-size: 13px; }
+  .flow-box .fb-sub { font-size: 12px; color: var(--color-text2); margin-top: 3px; }
+  .flow-arrow { color: var(--color-text3); font-size: 16px; width: 16px; text-align: center; flex-shrink: 0; }
+  .flow-multi { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-left: 26px; margin-bottom: 8px; }
+  .flow-multi .flow-box.up { border-left: 2px solid var(--color-accent); }
+  .flow-multi .flow-box.down { border-left: 2px solid var(--color-danger); }
+  .indicators-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 1rem; }
+
+  /* Rules */
+  .rule-list { display: flex; flex-direction: column; gap: 10px; }
+  .rule-item {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--color-bg2);
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    font-size: 13px; line-height: 1.6;
+    transition: border-color 0.15s;
+  }
+  .rule-item:hover { border-color: var(--color-border2); }
+  .rule-num {
+    font-size: 11px; font-weight: 700; min-width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: #0f0f0f;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+    font-family: var(--font-mono);
+  }
+  .rule-text { color: var(--color-text2); }
+  .rule-text strong { color: var(--color-text); font-weight: 600; }
+
+  @media (max-width: 560px) {
+    .detail-grid { grid-template-columns: 1fr; }
+    .flow-multi { grid-template-columns: 1fr; }
+    .indicators-grid { grid-template-columns: 1fr; }
+    .asset-grid { grid-template-columns: repeat(2, 1fr); }
+    .hub { padding: 1.25rem; }
+    .header { padding: 2rem 1.25rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="max-width:860px;margin:0 auto">
+    <div class="header-label">Hub de conocimiento · Trading</div>
+    <h1>Geopolítica &amp; Mercados</h1>
+    <p>Cómo los conflictos, sanciones y tensiones geopolíticas mueven <strong>divisas, materias primas, índices y futuros</strong>. Contexto macro para traders.</p>
+  </div>
+</div>
+
+<div class="hub">
+
+  <div class="intro-card">
+    <p>La geopolítica es el <strong>contexto macroeconómico más impredecible</strong>. Guerras, sanciones, elecciones y acuerdos comerciales generan flujos de capital masivos que se reflejan directamente en los precios. Entender estos mecanismos te da <strong>ventaja narrativa</strong> sobre el precio.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('conflictos', this)">Conflictos actuales</button>
+    <button class="tab-btn" onclick="showTab('activos', this)">Activos y guerra</button>
+    <button class="tab-btn" onclick="showTab('mecanismo', this)">Mecanismo del miedo</button>
+    <button class="tab-btn" onclick="showTab('reglas', this)">Reglas del trader</button>
+  </div>
+
+  <!-- TAB 1 -->
+  <div class="panel active" id="tab-conflictos">
+    <div class="section-title">Conflictos activos con impacto en mercados · 2025–2026</div>
+    <div class="conflict-list">
+
+      <div class="conflict-card" onclick="toggleConflict(this)">
+        <div class="conflict-header">
+          <span class="conflict-name">🇺🇦 Guerra Rusia–Ucrania</span>
+          <span class="conflict-badge alto">Impacto alto</span>
+        </div>
+        <div class="conflict-detail">
+          <p>El conflicto más relevante para los mercados europeos. Distorsiona energía, granos y el euro.</p>
+          <div class="detail-grid">
+            <div class="detail-chip"><strong>Gas natural</strong>Precios disparados. Europa depende de suministro alternativo (GNL).</div>
+            <div class="detail-chip"><strong>Trigo / Maíz</strong>Ucrania es granero mundial. Cualquier escalada sube el trigo.</div>
+            <div class="detail-chip"><strong>EUR/USD</strong>Euro debilitado por riesgo energético europeo. Refugio → USD.</div>
+            <div class="detail-chip"><strong>Índices EU</strong>DAX y CAC muy sensibles. Correlación negativa con escalada.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="conflict-card" onclick="toggleConflict(this)">
+        <div class="conflict-header">
+          <span class="conflict-name">🇮🇱 Gaza / Medio Oriente</span>
+          <span class="conflict-badge alto">Impacto alto</span>
+        </div>
+        <div class="conflict-detail">
+          <p>Afecta directamente al petróleo si amenaza el Estrecho de Ormuz o implica a Irán/Arabia Saudí.</p>
+          <div class="detail-grid">
+            <div class="detail-chip"><strong>WTI / Brent</strong>Spike inmediato en cualquier escalada hacia Irán o bloqueo naval.</div>
+            <div class="detail-chip"><strong>Oro (XAU)</strong>Refugio clásico. Sube con tensión. Muy sensible a este conflicto.</div>
+            <div class="detail-chip"><strong>USD</strong>Fortaleza por demanda de refugio global.</div>
+            <div class="detail-chip"><strong>ILS / TA-35</strong>Shekel israelí bajo presión. Índice Tel Aviv débil.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="conflict-card" onclick="toggleConflict(this)">
+        <div class="conflict-header">
+          <span class="conflict-name">🇨🇳🇺🇸 Guerra comercial EE.UU.–China</span>
+          <span class="conflict-badge alto">Impacto alto</span>
+        </div>
+        <div class="conflict-detail">
+          <p>Aranceles masivos de Trump 2025. Guerra de tarifas con impacto global en cadenas de suministro.</p>
+          <div class="detail-grid">
+            <div class="detail-chip"><strong>USD/CNH</strong>Yuan bajo presión. PBOC interviene activamente.</div>
+            <div class="detail-chip"><strong>Cobre</strong>China es el mayor consumidor. Tensión → caída del cobre.</div>
+            <div class="detail-chip"><strong>SPX / NDX</strong>Sectores tech y consumo muy expuestos a aranceles.</div>
+            <div class="detail-chip"><strong>AUD/USD</strong>Australia exporta materias primas a China. Proxy de riesgo China.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="conflict-card" onclick="toggleConflict(this)">
+        <div class="conflict-header">
+          <span class="conflict-name">🇹🇼 Tensión China–Taiwán</span>
+          <span class="conflict-badge medio">Impacto medio</span>
+        </div>
+        <div class="conflict-detail">
+          <p>Riesgo sistémico de baja probabilidad pero altísimo impacto. Taiwán = 60% de los semiconductores más avanzados del mundo.</p>
+          <div class="detail-grid">
+            <div class="detail-chip"><strong>Semiconductores</strong>TSMC domina. Conflicto → crisis global de chips.</div>
+            <div class="detail-chip"><strong>JPY / CHF</strong>Yen y franco suizo como refugio extremo en Asia.</div>
+            <div class="detail-chip"><strong>NDX / SOX</strong>Nasdaq y sector semis colapsarían ante escalada real.</div>
+            <div class="detail-chip"><strong>TWD</strong>Dólar taiwanés como indicador de tensión en tiempo real.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="conflict-card" onclick="toggleConflict(this)">
+        <div class="conflict-header">
+          <span class="conflict-name">🌍 Sanciones y desdolarización</span>
+          <span class="conflict-badge medio">Tendencia estructural</span>
+        </div>
+        <div class="conflict-detail">
+          <p>BRICS intentando reducir dependencia del USD. Rusia, Irán y China operando fuera del sistema SWIFT.</p>
+          <div class="detail-grid">
+            <div class="detail-chip"><strong>DXY (índice USD)</strong>Presión bajista estructural a largo plazo si el USD pierde dominancia.</div>
+            <div class="detail-chip"><strong>Oro</strong>Bancos centrales comprando masivamente. Tendencia alcista secular.</div>
+            <div class="detail-chip"><strong>RUB / IRR</strong>Divisas sancionadas, operan en circuitos paralelos.</div>
+            <div class="detail-chip"><strong>Commodities en CNY</strong>China paga petróleo saudí en yuanes. Nuevo vector.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TAB 2 -->
+  <div class="panel" id="tab-activos">
+    <div class="section-title">Selecciona un activo para ver su relación con la geopolítica</div>
+    <div class="asset-grid">
+      <div class="asset-card" onclick="showAsset(this, 'oro')"><div class="asset-name">Oro (XAU)</div><div class="asset-sub">Refugio clásico</div></div>
+      <div class="asset-card" onclick="showAsset(this, 'petroleo')"><div class="asset-name">Petróleo (WTI)</div><div class="asset-sub">Geopolítica OPEP+</div></div>
+      <div class="asset-card" onclick="showAsset(this, 'usd')"><div class="asset-name">USD (DXY)</div><div class="asset-sub">Moneda refugio</div></div>
+      <div class="asset-card" onclick="showAsset(this, 'eur')"><div class="asset-name">EUR/USD</div><div class="asset-sub">Europa y riesgo</div></div>
+      <div class="asset-card" onclick="showAsset(this, 'jpy')"><div class="asset-name">JPY / CHF</div><div class="asset-sub">Refugios alternativos</div></div>
+      <div class="asset-card" onclick="showAsset(this, 'sp500')"><div class="asset-name">S&amp;P 500 / NDX</div><div class="asset-sub">Índices EE.UU.</div></div>
+      <div class="asset-card" onclick="showAsset(this, 'dax')"><div class="asset-name">DAX / CAC</div><div class="asset-sub">Índices europeos</div></div>
+      <div class="asset-card" onclick="showAsset(this, 'cobre')"><div class="asset-name">Cobre / Plata</div><div class="asset-sub">Metales industriales</div></div>
+    </div>
+    <div class="impact-box" id="asset-impact">
+      <div class="impact-title" style="color:var(--color-text3)">Selecciona un activo arriba</div>
+      <div class="impact-content">Verás cómo la geopolítica afecta a ese mercado específico.</div>
+    </div>
+  </div>
+
+  <!-- TAB 3 -->
+  <div class="panel" id="tab-mecanismo">
+    <div class="section-title">Cómo el miedo geopolítico se transmite a los precios</div>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-box">
+          <div class="fb-title">Evento geopolítico</div>
+          <div class="fb-sub">Conflicto armado · Sanción · Elección · Acuerdo comercial · Crisis diplomática</div>
+        </div>
+      </div>
+      <div class="flow-step" style="padding-left:12px">
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box">
+          <div class="fb-title">Reacción del mercado institucional</div>
+          <div class="fb-sub">Fondos soberanos, bancos centrales y hedge funds reposicionan en minutos</div>
+        </div>
+      </div>
+      <div class="flow-step" style="padding-left:12px">
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box">
+          <div class="fb-title">Dos vectores simultáneos</div>
+          <div class="fb-sub">Capital hacia activos refugio y salida de activos de riesgo al mismo tiempo</div>
+        </div>
+      </div>
+    </div>
+    <div class="flow-multi">
+      <div class="flow-box up">
+        <div class="fb-title" style="color:var(--color-accent)">SUBE (refugio)</div>
+        <div class="fb-sub">Oro · USD · JPY · CHF · Bonos soberanos EE.UU. · Petróleo (si afecta suministro)</div>
+      </div>
+      <div class="flow-box down">
+        <div class="fb-title" style="color:var(--color-danger)">BAJA (riesgo)</div>
+        <div class="fb-sub">Índices bursátiles · Divisas emergentes · Cobre · Materias primas industriales</div>
+      </div>
+    </div>
+    <div class="flow">
+      <div class="flow-step" style="padding-left:12px">
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box">
+          <div class="fb-title">Fase 2: Desescalada o resolución</div>
+          <div class="fb-sub">Los movimientos se revierten parcialmente. Oportunidad en el "risk-on" de vuelta.</div>
+        </div>
+      </div>
+      <div class="flow-step" style="padding-left:12px">
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box">
+          <div class="fb-title">Distorsión persistente</div>
+          <div class="fb-sub">Si el conflicto dura meses, se crea un nuevo régimen de precio. No hay vuelta al baseline anterior.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:1.5rem">
+      <div class="section-title">Indicadores de estrés que debes monitorizar</div>
+      <div class="indicators-grid">
+        <div class="detail-chip"><strong>VIX (Fear Index)</strong>Volatilidad implícita del S&P. Por encima de 25 = mercado asustado.</div>
+        <div class="detail-chip"><strong>DXY (Índice USD)</strong>Fortaleza del dólar = señal de risk-off global.</div>
+        <div class="detail-chip"><strong>Spread bono 10Y</strong>Si los tipos suben bruscamente, hay fuga de capitales.</div>
+        <div class="detail-chip"><strong>Gold/Silver ratio</strong>Oro sube más que plata en crisis = pánico puro, no inflación.</div>
+        <div class="detail-chip"><strong>Oil term structure</strong>Contango→backwardation rápido = escasez percibida inminente.</div>
+        <div class="detail-chip"><strong>USD/JPY</strong>Si baja de golpe = institucionales comprando yen = riesgo extremo.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4 -->
+  <div class="panel" id="tab-reglas">
+    <div class="section-title">Reglas del trader ante eventos geopolíticos</div>
+    <div class="rule-list">
+      <div class="rule-item"><div class="rule-num">1</div><div class="rule-text"><strong>No operas el evento, operas la reacción.</strong> El primer movimiento tras una noticia suele ser emocional y exagerado. El edge está en la segunda fase, cuando el mercado revalúa.</div></div>
+      <div class="rule-item"><div class="rule-num">2</div><div class="rule-text"><strong>Distingue evento discreto vs. tendencia estructural.</strong> Un ataque puntual genera volatilidad a corto plazo. Una guerra prolongada distorsiona el mercado durante meses (nueva normalidad de precios).</div></div>
+      <div class="rule-item"><div class="rule-num">3</div><div class="rule-text"><strong>Correlaciones geopolíticas no son permanentes.</strong> USD/JPY como refugio funciona la mayoría del tiempo, pero si la crisis es en Japón, el yen puede bajar. Confirma siempre con el contexto actual.</div></div>
+      <div class="rule-item"><div class="rule-num">4</div><div class="rule-text"><strong>El petróleo es el activo más manipulable.</strong> OPEP+ puede recortar producción en 48h. No mantengas posiciones en crudo sin stop amplio si hay tensión en Oriente Medio.</div></div>
+      <div class="rule-item"><div class="rule-num">5</div><div class="rule-text"><strong>En días de alto impacto geopolítico, reduce tamaño.</strong> La liquidez se vuelve errática. Los spreads se abren. El slippage destruye el edge técnico que tienes sobre el precio.</div></div>
+      <div class="rule-item"><div class="rule-num">6</div><div class="rule-text"><strong>El oro es el termómetro del miedo real.</strong> Si el oro sube sostenidamente mientras los índices también suben, hay algo que el mercado de renta variable no está descontando todavía.</div></div>
+      <div class="rule-item"><div class="rule-num">7</div><div class="rule-text"><strong>Lee el flujo de órdenes con el contexto narrativo.</strong> Si sabes que hay tensión en el Mar Rojo, una absorción fuerte en WTI tiene mucho más peso. El MATVARD cobra más sentido con el contexto macro.</div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function toggleConflict(el) {
+  const detail = el.querySelector('.conflict-detail');
+  const isOpen = detail.classList.contains('open');
+  document.querySelectorAll('.conflict-detail').forEach(d => d.classList.remove('open'));
+  document.querySelectorAll('.conflict-card').forEach(c => c.classList.remove('open'));
+  if (!isOpen) { detail.classList.add('open'); el.classList.add('open'); }
+}
+
+const assetData = {
+  oro: { title: 'Oro (XAU/USD) — El refugio por excelencia', content: 'El oro sube en casi cualquier crisis geopolítica porque es el activo que los inversores institucionales usan para proteger capital cuando todo lo demás es incierto. En 2024-2025 rompió máximos históricos superando los 3.000$/oz impulsado por guerras, desdolarización y compras masivas de bancos centrales (China, India, Polonia). Correlación negativa con el USD en condiciones normales, pero ambos pueden subir juntos en crisis extremas. En futuros, el contrato GC (COMEX) es el referente. Vigila: VIX alto + DXY fuerte = oro explosivo al alza.' },
+  petroleo: { title: 'Petróleo (WTI / Brent) — Geopolítica OPEP+', content: 'El petróleo es el activo más directamente ligado a la geopolítica. Dos vectores: oferta (OPEP+, sanciones a Rusia/Irán, producción de EE.UU.) y demanda (crecimiento China/India). El Estrecho de Ormuz es el punto de estrangulamiento más vigilado: por ahí pasa el 20% del petróleo mundial. Cualquier escalada con Irán dispara el Brent 5-10% en sesiones. Actualmente: EE.UU. como mayor productor presiona precios a la baja; OPEP+ recorta para defender niveles. Spread WTI-Brent indica tensiones de transporte y calidad.' },
+  usd: { title: 'USD / DXY — La moneda refugio dominante', content: 'En crisis geopolíticas, el capital global fluye hacia el dólar porque EE.UU. tiene los mercados de deuda más líquidos del mundo. DXY por encima de 104-105 indica risk-off serio. La desdolarización (BRICS, acuerdos bilaterales en yuanes) es una tendencia estructural que presiona el DXY a largo plazo, pero a corto plazo el dólar sigue siendo el rey en crisis. Vigila: si EE.UU. es el origen de la crisis (crisis política interna, default técnico), el dólar puede debilitarse paradójicamente.' },
+  eur: { title: 'EUR/USD — El proxy del riesgo europeo', content: 'El euro es muy sensible a la guerra en Ucrania por la dependencia energética de Europa. Cada invierno con tensión en el suministro de gas = presión bajista en EUR. Además, el diferencial de tipos BCE vs Fed ha marcado mucho el par desde 2022. Con la guerra comercial EE.UU.-China, Europa queda en medio: pierde exportaciones a China y sufre represalias arancelarias de Trump. El EUR/USD por debajo de 1.05 históricamente ha sido zona de intervención o soporte.' },
+  jpy: { title: 'JPY / CHF — Refugios alternativos', content: 'El yen japonés (JPY) y el franco suizo (CHF) son los dos refugios preferidos fuera del USD. El JPY sube cuando hay crisis porque Japón es acreedor neto masivo del mundo: en estrés, los inversores japoneses repatrían capital. USD/JPY cae en crisis = señal de pánico. El CHF funciona por la neutralidad histórica de Suiza. En 2022-2024 el yen fue muy débil por la política ultra-laxa del Banco de Japón (YCC). Ahora que el BoJ normaliza tipos, el JPY recupera su rol de refugio. El carry trade JPY es un tema clave.' },
+  sp500: { title: 'S&P 500 / Nasdaq — Índices americanos', content: 'Los índices americanos son los más resistentes geopolíticamente porque el mercado descuenta que EE.UU. está alejado de la mayoría de conflictos físicos. Sin embargo: guerra comercial China (afecta tech y consumo), sanciones (energía), inflación derivada de conflictos (petróleo caro = Fed más hawkish = múltiplos más bajos). El Nasdaq es especialmente sensible al tema de Taiwán/semiconductores. En 2025, las subidas de aranceles de Trump causaron correcciones del 5-10% en pocos días.' },
+  dax: { title: 'DAX / CAC 40 — Índices europeos', content: 'El DAX alemán y el CAC francés son mucho más sensibles a la geopolítica europea que sus equivalentes americanos. Alemania es la más expuesta: su industria (autos, química, maquinaria) depende de energía barata y exportaciones a China y Rusia. El gas ruso encarecido fue el catalizador de la crisis industrial alemana 2022-2024. Paradójicamente, el plan de rearme europeo 2025 (100bn€ en defensa) impulsó el DAX al alza: Rheinmetall, Airbus, Leonardo. La geopolítica puede ser alcista para ciertos sectores.' },
+  cobre: { title: 'Cobre / Plata — Metales industriales y semi-refugio', content: 'El cobre es el "PhD en economía" de los metales: si sube, la economía global va bien (sobre todo China). En tensiones geopolíticas que afectan a China o a cadenas de suministro, el cobre baja. Es el mejor proxy del ciclo industrial. La plata tiene una naturaleza dual: parte refugio (como el oro) y parte industrial (paneles solares, electrónica). En crisis de mercado, el ratio Oro/Plata sube porque la plata sufre por la parte industrial. El cobre futuro en CME (HG) y el aluminio en LME son clave.' }
+};
+
+function showAsset(el, id) {
+  document.querySelectorAll('.asset-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  const d = assetData[id];
+  document.getElementById('asset-impact').innerHTML =
+    `<div class="impact-title">${d.title}</div><div class="impact-content">${d.content}</div>`;
+}
+</script>
+</body>
+</html>
