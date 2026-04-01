@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bancos Centrales y Política Monetaria — Hub Interactivo</title>
+<style>
+  :root {
+    --color-bg: #0f0f0f;
+    --color-bg2: #161616;
+    --color-bg3: #1e1e1e;
+    --color-border: rgba(255,255,255,0.08);
+    --color-border2: rgba(255,255,255,0.14);
+    --color-text: #e8e6df;
+    --color-text2: #9c9a92;
+    --color-text3: #6b6962;
+    --color-accent: #EF9F27;
+    --color-info: #378ADD;
+    --color-info-bg: rgba(55,138,221,0.12);
+    --color-danger: #E24B4A;
+    --color-danger-bg: rgba(226,75,74,0.12);
+    --color-success: #639922;
+    --color-success-bg: rgba(99,153,34,0.12);
+    --color-warning: #BA7517;
+    --color-warning-bg: rgba(186,117,23,0.12);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --font-sans: 'Syne', 'DM Sans', system-ui, sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); background: var(--color-bg); color: var(--color-text); min-height: 100vh; line-height: 1.6; }
+
+  .header {
+    padding: 3rem 2rem 2rem;
+    border-bottom: 0.5px solid var(--color-border);
+    position: relative; overflow: hidden;
+  }
+  .header::before {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(55,138,221,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--color-info); margin-bottom: 10px; }
+  .header h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 10px; }
+  .header p { font-size: 14px; color: var(--color-text2); max-width: 580px; line-height: 1.65; }
+  strong { font-weight: 600; color: var(--color-text); }
+
+  .hub { max-width: 860px; margin: 0 auto; padding: 2rem; }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; padding-bottom: 1rem; border-bottom: 0.5px solid var(--color-border); }
+  .tab { font-size: 13px; font-weight: 500; padding: 7px 16px; border-radius: 999px; border: 0.5px solid var(--color-border2); background: transparent; color: var(--color-text2); cursor: pointer; transition: all 0.15s; font-family: var(--font-sans); }
+  .tab:hover { background: var(--color-bg3); color: var(--color-text); }
+  .tab.on { background: var(--color-accent); color: #0f0f0f; border-color: var(--color-accent); font-weight: 600; }
+
+  .panel { display: none; }
+  .panel.on { display: block; }
+  .sec { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text3); margin-bottom: 12px; }
+
+  .card { background: var(--color-bg2); border: 0.5px solid var(--color-border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 10px; }
+  .chip { font-size: 12px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--color-bg3); color: var(--color-text2); line-height: 1.5; }
+  .chip strong { color: var(--color-accent); font-weight: 600; display: block; margin-bottom: 3px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+
+  .row { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-bottom: 0.5px solid var(--color-border); }
+  .row:last-child { border-bottom: none; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .label { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .sub { font-size: 12px; color: var(--color-text2); line-height: 1.55; margin-top: 4px; }
+
+  .impact-chip { font-size: 12px; padding: 4px 10px; border-radius: 999px; font-weight: 600; display: inline-block; margin: 2px; }
+  .up { background: var(--color-success-bg); color: var(--color-success); }
+  .dn { background: var(--color-danger-bg); color: var(--color-danger); }
+  .nt { background: var(--color-bg3); color: var(--color-text2); }
+
+  /* Stepper */
+  .step-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .step-dots { display: flex; gap: 6px; }
+  .sdot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-border2); transition: background 0.2s; }
+  .sdot.on { background: var(--color-accent); }
+  .step-btn { font-size: 13px; padding: 6px 16px; border-radius: 999px; border: 0.5px solid var(--color-border2); background: transparent; color: var(--color-text2); cursor: pointer; font-family: var(--font-sans); transition: all 0.15s; }
+  .step-btn:hover { background: var(--color-bg3); color: var(--color-text); }
+  .step-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .step-sub { font-size: 13px; color: var(--color-text2); line-height: 1.65; margin-bottom: 14px; }
+  .step-sesgo { font-size: 13px; font-weight: 600; padding: 10px 14px; border-radius: var(--radius-md); background: var(--color-bg3); border-left: 2px solid var(--color-accent); border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+  .step-counter { font-size: 12px; color: var(--color-text3); text-align: center; margin-top: 6px; }
+
+  /* Decoder */
+  .phrase-card { background: var(--color-bg2); border: 0.5px solid var(--color-border); border-radius: var(--radius-md); padding: 12px 16px; cursor: pointer; transition: border-color 0.15s; margin-bottom: 8px; }
+  .phrase-card:hover { border-color: var(--color-border2); }
+  .phrase-card.open { border-color: var(--color-info); }
+  .phrase-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .phrase-text { font-size: 13px; font-weight: 600; font-style: italic; }
+  .badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; }
+  .b-hawk { background: var(--color-danger-bg); color: var(--color-danger); }
+  .b-dove { background: var(--color-info-bg); color: var(--color-info); }
+  .b-neutral { background: var(--color-bg3); color: var(--color-text2); }
+  .phrase-detail { display: none; margin-top: 12px; padding-top: 12px; border-top: 0.5px solid var(--color-border); font-size: 13px; color: var(--color-text2); line-height: 1.6; }
+  .phrase-detail.open { display: block; }
+  .phrase-impacts { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+
+  /* BCB */
+  .bcb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1rem; }
+  .bcb-card { background: var(--color-bg2); border: 0.5px solid var(--color-border); border-radius: var(--radius-md); padding: 12px 14px; cursor: pointer; transition: all 0.15s; }
+  .bcb-card:hover { border-color: var(--color-border2); background: var(--color-bg3); }
+  .bcb-card.sel { border-color: var(--color-info); background: var(--color-bg3); }
+  .bcb-name { font-size: 16px; font-weight: 800; margin-bottom: 3px; }
+  .bcb-full { font-size: 11px; color: var(--color-text3); line-height: 1.4; }
+  .bcb-detail { background: var(--color-bg2); border: 0.5px solid var(--color-border); border-left: 2px solid var(--color-info); border-radius: 0 var(--radius-lg) var(--radius-lg) 0; padding: 1rem 1.25rem; min-height: 90px; }
+  .bcb-dtitle { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .bcb-dbody { font-size: 13px; color: var(--color-text2); line-height: 1.65; }
+
+  .diff-note { background: var(--color-bg3); border-left: 2px solid var(--color-accent); border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 10px 14px; font-size: 13px; color: var(--color-text2); line-height: 1.6; margin-top: 8px; }
+  .diff-note strong { color: var(--color-text); }
+
+  @media (max-width: 560px) {
+    .grid2 { grid-template-columns: 1fr; }
+    .bcb-grid { grid-template-columns: repeat(2, 1fr); }
+    .hub { padding: 1.25rem; }
+    .header { padding: 2rem 1.25rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="max-width:860px;margin:0 auto">
+    <div class="header-label">Hub de conocimiento · Macro</div>
+    <h1>Bancos centrales<br>y política monetaria</h1>
+    <p>Los bancos centrales son los mayores movedores de capital del mundo. Entender su lenguaje, sus ciclos y sus mandatos te da una <strong>ventaja estructural</strong> sobre el precio.</p>
+  </div>
+</div>
+
+<div class="hub">
+  <div class="tabs">
+    <button class="tab on" onclick="sw('fundamentos',this)">Fundamentos</button>
+    <button class="tab" onclick="sw('ciclo',this)">Ciclo de tipos</button>
+    <button class="tab" onclick="sw('decoder',this)">Decodificador Fed/BCE</button>
+    <button class="tab" onclick="sw('bancos',this)">Los 6 bancos clave</button>
+  </div>
+
+  <!-- FUNDAMENTOS -->
+  <div class="panel on" id="p-fundamentos">
+    <div class="sec">Qué hacen los bancos centrales y por qué mueven los mercados</div>
+    <div class="grid2">
+      <div class="chip"><strong>Mandato dual (Fed)</strong>Máximo empleo + estabilidad de precios (~2%). Cuando ambos chocan, la Fed tiene que elegir.</div>
+      <div class="chip"><strong>Mandato único (BCE)</strong>Solo estabilidad de precios. Inflación &lt; 2% cerca del objetivo. Más restrictivo que la Fed en teoría.</div>
+      <div class="chip"><strong>Tipos de interés</strong>El precio del dinero. Tipos altos = dinero caro = frena economía e inflación. Tipos bajos = dinero barato = estimula.</div>
+      <div class="chip"><strong>QE / QT</strong>Quantitative Easing: el banco compra bonos, inyecta liquidez. QT es lo contrario. QE = presión bajista en USD/EUR.</div>
+      <div class="chip"><strong>Forward guidance</strong>Las señales verbales sobre decisiones futuras. A veces mueven el mercado más que la propia decisión.</div>
+      <div class="chip"><strong>Dot plot (Fed)</strong>Proyección de tipos de cada miembro del FOMC. El mercado lo disecciona punto a punto. Mueve EUR/USD y bonos.</div>
+    </div>
+
+    <div class="sec">Cómo los tipos afectan a cada activo que operas</div>
+    <div class="card" style="padding:0">
+      <div class="row">
+        <div class="dot" style="background:var(--color-danger)"></div>
+        <div style="flex:1">
+          <div class="label">Subida de tipos → impacto en tus activos</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+            <span class="impact-chip dn">EUR/USD baja</span>
+            <span class="impact-chip dn">Oro baja</span>
+            <span class="impact-chip dn">NQ/ES presión</span>
+            <span class="impact-chip dn">Bonos bajan</span>
+            <span class="impact-chip up">USD sube</span>
+            <span class="impact-chip nt">WTI mixto</span>
+          </div>
+          <div class="sub">Dinero caro → capital sale de riesgo hacia renta fija con mayor rendimiento. El dólar se aprecia porque los bonos americanos pagan más.</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="dot" style="background:var(--color-success)"></div>
+        <div style="flex:1">
+          <div class="label">Bajada de tipos → impacto en tus activos</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+            <span class="impact-chip up">EUR/USD sube</span>
+            <span class="impact-chip up">Oro sube</span>
+            <span class="impact-chip up">NQ/ES rally</span>
+            <span class="impact-chip up">Bonos suben</span>
+            <span class="impact-chip dn">USD baja</span>
+            <span class="impact-chip up">WTI puede subir</span>
+          </div>
+          <div class="sub">Dinero barato → capital fluye hacia activos de riesgo buscando rentabilidad. El oro sube porque su coste de oportunidad (no paga intereses) baja.</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="dot" style="background:var(--color-warning)"></div>
+        <div style="flex:1">
+          <div class="label">Pausa / tipos en espera → el diferencial entre bancos manda</div>
+          <div class="sub">Si la Fed pausa pero el BCE sigue subiendo, el EUR/USD sube (diferencial de tipos favorable al euro). El mercado de divisas vive del diferencial, no del nivel absoluto.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="diff-note"><strong>La regla del diferencial de tipos:</strong> El par EUR/USD no depende solo de los tipos de la Fed o del BCE — depende de la DIFERENCIA entre ambos. Si Fed = 5.25% y BCE = 4%, el diferencial es +1.25% a favor del USD. Eso atrae capital hacia dólares y deprime el EUR/USD. Si el BCE sube más rápido que la Fed, ese diferencial se reduce y el EUR/USD sube.</div>
+  </div>
+
+  <!-- CICLO DE TIPOS -->
+  <div class="panel" id="p-ciclo">
+    <div class="sec">Las 5 fases del ciclo monetario — navega paso a paso</div>
+    <div class="step-nav">
+      <button class="step-btn" onclick="stepPrev()">← Anterior</button>
+      <div class="step-dots" id="step-dots"></div>
+      <button class="step-btn" onclick="stepNext()">Siguiente →</button>
+    </div>
+    <div id="step-content"></div>
+  </div>
+
+  <!-- DECODER -->
+  <div class="panel" id="p-decoder">
+    <div class="sec">Decodificador de lenguaje — qué significa cada frase de la Fed y el BCE</div>
+    <div id="phrase-list"></div>
+  </div>
+
+  <!-- BANCOS -->
+  <div class="panel" id="p-bancos">
+    <div class="sec">Los 6 bancos centrales más relevantes para tus operaciones</div>
+    <div class="bcb-grid" id="bcb-grid"></div>
+    <div class="bcb-detail" id="bcb-detail">
+      <div class="bcb-dtitle" style="color:var(--color-text2)">Selecciona un banco central arriba</div>
+      <div class="bcb-dbody">Verás su mandato, cómo te afecta y qué debes monitorizar.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function sw(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+  document.getElementById('p-' + id).classList.add('on');
+  btn.classList.add('on');
+}
+
+const steps = [
+  {
+    title: 'Fase 1 — Expansión / tipos bajos',
+    sub: 'La economía crece, el desempleo es bajo, los bancos centrales mantienen tipos en mínimos para sostener el ciclo. Liquidez abundante en el sistema.',
+    activos: [{l:'Índices',d:'Tendencia alcista sostenida. Múltiplos altos.',c:'up'},{l:'Oro',d:'Puede bajar o lateralizar. Coste de oportunidad alto.',c:'nt'},{l:'EUR/USD',d:'Depende del diferencial Fed vs BCE.',c:'nt'},{l:'WTI',d:'Demanda fuerte. Tendencia alcista.',c:'up'}],
+    sesgo: 'Sesgo: risk-on. Comprar índices en pullbacks. Cuidado con el oro.'
+  },
+  {
+    title: 'Fase 2 — Inflación aparece / inicio de subidas',
+    sub: 'La inflación supera el objetivo. El banco central empieza a subir tipos y hace forward guidance hawkish. El mercado reajusta expectativas violentamente.',
+    activos: [{l:'Índices',d:'Corrección fuerte. Múltiplos bajan al subir las tasas de descuento.',c:'dn'},{l:'Bonos',d:'Caen (precio inverso al tipo). 2022 = peor año de bonos en décadas.',c:'dn'},{l:'USD',d:'Se fortalece. Diferencial de tipos atrae capital.',c:'up'},{l:'EUR/USD',d:'Cae si la Fed sube más rápido que el BCE.',c:'dn'}],
+    sesgo: 'Sesgo: risk-off parcial. Fortaleza en USD. Cautela en índices. El oro puede caer también.'
+  },
+  {
+    title: 'Fase 3 — Pico de tipos / pausa',
+    sub: 'Los tipos llegan al máximo del ciclo. El banco central pausa. El mercado empieza a descontar el pivot (primeros recortes) antes de que ocurra.',
+    activos: [{l:'Índices',d:'Anticipación del pivot → rally especulativo.',c:'up'},{l:'Oro',d:'Empieza a subir anticipando bajadas de tipos.',c:'up'},{l:'Bonos',d:'Comienzan a recuperarse. Compra anticipatoria.',c:'up'},{l:'USD',d:'Empieza a perder fuerza. Diferencial se reduce.',c:'dn'}],
+    sesgo: 'Sesgo: inicio de reversión a risk-on. El oro y los bonos lideran antes que los índices.'
+  },
+  {
+    title: 'Fase 4 — Recortes de tipos / pivot',
+    sub: 'El banco central baja tipos formalmente. Es el evento más explosivo del ciclo. La razón del recorte importa: ¿recesión o precaución?',
+    activos: [{l:'Índices',d:'Reacción ambigua. Si los recortes son por recesión, caen. Si son profilácticos, suben.',c:'nt'},{l:'Oro',d:'Rally fuerte. Máximos históricos en ciclos de bajada.',c:'up'},{l:'EUR/USD',d:'Sube si la Fed recorta más que el BCE.',c:'up'},{l:'Bonos',d:'Rally continuado. Mejor activo del ciclo de bajada.',c:'up'}],
+    sesgo: 'Sesgo: distinguir el motivo del recorte. Recesión = risk-off incluso con tipos bajando.'
+  },
+  {
+    title: 'Fase 5 — Tipos bajos / nuevo ciclo',
+    sub: 'Tipos en mínimos de nuevo. La economía se estabiliza o entra en recuperación. El ciclo se reinicia desde la Fase 1.',
+    activos: [{l:'Índices',d:'Recuperación gradual. Bull market de largo plazo posible.',c:'up'},{l:'Oro',d:'Puede corregir cuando los índices retoman liderazgo.',c:'nt'},{l:'WTI',d:'Demanda se recupera. Subida cíclica.',c:'up'},{l:'Emergentes',d:'Divisas y activos emergentes se benefician del USD débil.',c:'up'}],
+    sesgo: 'Sesgo: risk-on renovado. Comprar el ciclo con convicción. Vigilar primeras señales de inflación.'
+  }
+];
+
+let stepIdx = 0;
+function renderStep() {
+  const s = steps[stepIdx];
+  document.getElementById('step-dots').innerHTML = steps.map((_, i) =>
+    `<div class="sdot${i === stepIdx ? ' on' : ''}"></div>`).join('');
+  const actHtml = s.activos.map(a =>
+    `<div class="chip" style="margin-bottom:0"><strong>${a.l}</strong>${a.d}</div>`).join('');
+  document.getElementById('step-content').innerHTML = `
+    <div class="card">
+      <div class="step-title">${s.title}</div>
+      <div class="step-sub">${s.sub}</div>
+      <div class="grid2" style="margin-bottom:12px">${actHtml}</div>
+      <div class="step-sesgo">${s.sesgo}</div>
+    </div>
+    <div class="step-counter">Fase ${stepIdx + 1} de ${steps.length}</div>
+  `;
+}
+function stepNext() { stepIdx = (stepIdx + 1) % steps.length; renderStep(); }
+function stepPrev() { stepIdx = (stepIdx - 1 + steps.length) % steps.length; renderStep(); }
+renderStep();
+
+const phrases = [
+  { text: '"Data dependent"', tone: 'neutral', meaning: 'No se comprometen con nada. Decisión reunión a reunión según los datos. Es la frase de mayor ambigüedad — el mercado reacciona poco.', impacts: [{l:'Movimiento mínimo',c:'nt'}] },
+  { text: '"Higher for longer"', tone: 'hawk', meaning: 'Los tipos se mantendrán altos durante más tiempo del que el mercado anticipa. Señal hawkish clara. Presión sobre índices y contra el oro.', impacts: [{l:'USD sube',c:'up'},{l:'Índices presión',c:'dn'},{l:'Oro baja',c:'dn'}] },
+  { text: '"Inflation is transitory"', tone: 'dove', meaning: 'Frase famosa de Powell en 2021 — error histórico. Significa que el banco central no ve inflación persistente. Señal dovish. El mercado puede ignorarlo si los datos contradicen.', impacts: [{l:'USD presión',c:'dn'},{l:'Índices rally',c:'up'}] },
+  { text: '"Vigilant on inflation"', tone: 'hawk', meaning: 'El banco central está alerta ante riesgos inflacionarios. No ha subido, pero está listo. Pre-hawkish. El mercado lo lee como subida inminente.', impacts: [{l:'USD sube levemente',c:'up'},{l:'Bonos bajan',c:'dn'}] },
+  { text: '"Appropriate to be patient"', tone: 'dove', meaning: 'No hay urgencia de actuar. Pausa implícita. El mercado lo interpreta como dovish. Señal de que no habrá subidas próximas.', impacts: [{l:'Índices suben',c:'up'},{l:'Oro sube',c:'up'},{l:'USD baja',c:'dn'}] },
+  { text: '"Meeting by meeting"', tone: 'neutral', meaning: 'Igual que "data dependent". Sin orientación futura. Incertidumbre máxima. El mercado puede reaccionar según el contexto previo.', impacts: [{l:'Volatilidad alta',c:'nt'}] },
+  { text: '"Restrictive territory"', tone: 'hawk', meaning: 'Los tipos ya están en zona restrictiva (por encima del neutral). Puede señalar que están cerca del pico. Ambiguo: puede ser hawkish final o inicio de pivot.', impacts: [{l:'Bonos suben',c:'up'},{l:'USD mixto',c:'nt'}] },
+  { text: '"Risks are balanced"', tone: 'dove', meaning: 'El banco central ve los riesgos de inflación y recesión equilibrados. Señal de que los tipos han tocado techo. Pre-pivot claro.', impacts: [{l:'Oro sube',c:'up'},{l:'Índices suben',c:'up'},{l:'USD baja',c:'dn'}] },
+  { text: '"Prepared to adjust"', tone: 'hawk', meaning: 'El banco central está listo para subir más si es necesario. Flexible al alza. Mucho más restrictivo que "data dependent".', impacts: [{l:'USD sube',c:'up'},{l:'EUR/USD baja',c:'dn'}] },
+  { text: '"Disinflation is underway"', tone: 'dove', meaning: 'Powell 2023. Reconocimiento de que la inflación está bajando. El mercado lo interpreta como inicio del final del ciclo restrictivo. Rally en índices.', impacts: [{l:'Índices rally',c:'up'},{l:'USD presión',c:'dn'},{l:'Oro sube',c:'up'}] },
+];
+
+function renderPhrases() {
+  document.getElementById('phrase-list').innerHTML = phrases.map((p, i) => `
+    <div class="phrase-card" onclick="togglePhrase(this,${i})">
+      <div class="phrase-header">
+        <span class="phrase-text">"${p.text.replace(/^"|"$/g, '')}"</span>
+        <span class="badge b-${p.tone === 'hawk' ? 'hawk' : p.tone === 'dove' ? 'dove' : 'neutral'}">${p.tone === 'hawk' ? 'Hawkish' : p.tone === 'dove' ? 'Dovish' : 'Neutral'}</span>
+      </div>
+      <div class="phrase-detail" id="phd-${i}">
+        <div>${p.meaning}</div>
+        <div class="phrase-impacts">${p.impacts.map(imp => `<span class="impact-chip ${imp.c}">${imp.l}</span>`).join('')}</div>
+      </div>
+    </div>
+  `).join('');
+}
+function togglePhrase(el, i) {
+  const d = document.getElementById('phd-' + i);
+  const open = d.classList.contains('open');
+  document.querySelectorAll('.phrase-detail').forEach(x => x.classList.remove('open'));
+  document.querySelectorAll('.phrase-card').forEach(x => x.classList.remove('open'));
+  if (!open) { d.classList.add('open'); el.classList.add('open'); }
+}
+renderPhrases();
+
+const bcbs = [
+  { name: 'Fed', full: 'Reserva Federal EE.UU.', detail: 'El banco central más importante del mundo. Sus decisiones mueven TODOS tus activos porque el USD es la moneda de reserva global. Reunión 8x año (FOMC). Publicaciones clave: dot plot, actas FOMC, discursos de Powell en Jackson Hole. Mandato dual: empleo + inflación ~2%. Herramientas: fed funds rate, QE/QT, forward guidance. Lo que debes saber: el mercado descuenta los movimientos de la Fed con 3-6 meses de anticipación vía los futuros de tipos (CME FedWatch Tool). Aprende a leer esa herramienta — te da la probabilidad de subida/bajada que el mercado está descontando en tiempo real.' },
+  { name: 'BCE', full: 'Banco Central Europeo', detail: 'Afecta directamente al EUR/USD y a los índices europeos (DAX, CAC). Reunión cada 6 semanas. Mandato único: inflación &lt; 2%. Lagarde es más comunicativa y política que Powell. Clave: el diferencial de tipos Fed-BCE es el driver principal del EUR/USD. También monitoriza el spread entre bonos alemanes y periféricos (spread BTP-Bund) como indicador de estrés en la eurozona.' },
+  { name: 'BoJ', full: 'Banco de Japón', detail: 'El banco más exótico y peligroso para ignorar. Mantuvo tipos negativos hasta 2024 (YCC = yield curve control). El yen es el principal activo refugio en Asia. El carry trade JPY — pedir prestado en yenes baratos para invertir en activos con mayor rendimiento — es un trade masivo. Cuando el BoJ sube tipos o el mercado entra en pánico, el carry trade se deshace y el JPY sube explosivamente. USD/JPY es un termómetro de riesgo global.' },
+  { name: 'BoE', full: 'Banco de Inglaterra', detail: 'Relevante para GBP/USD y GBP/JPY. El Brexit añade una capa de complejidad política a sus decisiones. Reuniones cada 6 semanas. GBP es muy sensible a datos de inflación del Reino Unido porque el BoE ha tenido problemas persistentes con el IPC. Si operas pares de libra, sigue de cerca las actas del BoE (MPC minutes) y los datos de CPI británico.' },
+  { name: 'PBoC', full: 'Banco Popular de China', detail: 'No sigue un calendario fijo de reuniones — actúa cuando quiere. Mueve el yuan (USD/CNH) mediante intervenciones directas y ajustes del tipo de cambio de referencia diario (fixing). Afecta masivamente al cobre, materias primas industriales y al AUD/USD. En 2023-2025, el PBoC ha estado en modo estimulativo para contrarrestar la debilidad económica china tras la crisis inmobiliaria.' },
+  { name: 'SNB', full: 'Banco Nacional Suizo', detail: 'El banco del franco suizo, el segundo refugio más importante tras el yen. El SNB es famoso por intervenir directamente en divisas — compra o vende francos para controlar el tipo de cambio. En 2015 abandonó el cap EUR/CHF de forma sorpresa y causó uno de los movimientos más caóticos de la historia del forex. Si hay crisis global, el CHF sube independientemente de lo que haga el SNB.' },
+];
+
+function renderBCBs() {
+  document.getElementById('bcb-grid').innerHTML = bcbs.map((b, i) => `
+    <div class="bcb-card" onclick="showBCB(this,${i})">
+      <div class="bcb-name">${b.name}</div>
+      <div class="bcb-full">${b.full}</div>
+    </div>
+  `).join('');
+}
+function showBCB(el, i) {
+  document.querySelectorAll('.bcb-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  const b = bcbs[i];
+  document.getElementById('bcb-detail').innerHTML = `<div class="bcb-dtitle">${b.name} — ${b.full}</div><div class="bcb-dbody">${b.detail}</div>`;
+}
+renderBCBs();
+</script>
+</body>
+</html>
