@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leer Noticias Macro como Trader — Hub Interactivo</title>
+<style>
+  :root {
+    --color-bg: #0f0f0f;
+    --color-bg2: #161616;
+    --color-bg3: #1e1e1e;
+    --color-border: rgba(255,255,255,0.08);
+    --color-border2: rgba(255,255,255,0.14);
+    --color-text: #e8e6df;
+    --color-text2: #9c9a92;
+    --color-text3: #6b6962;
+    --color-accent: #EF9F27;
+    --color-info: #378ADD;
+    --color-info-bg: rgba(55,138,221,0.12);
+    --color-danger: #E24B4A;
+    --color-danger-bg: rgba(226,75,74,0.12);
+    --color-success: #639922;
+    --color-success-bg: rgba(99,153,34,0.12);
+    --color-warning: #BA7517;
+    --color-warning-bg: rgba(186,117,23,0.12);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --font-sans: 'Syne', 'DM Sans', system-ui, sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); background: var(--color-bg); color: var(--color-text); min-height: 100vh; line-height: 1.6; }
+
+  .header {
+    padding: 3rem 2rem 2rem;
+    border-bottom: 0.5px solid var(--color-border);
+    position: relative; overflow: hidden;
+  }
+  .header::before {
+    content: ''; position: absolute; top: -60px; left: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(239,159,39,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--color-accent); margin-bottom: 10px; }
+  .header h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 10px; }
+  .header p { font-size: 14px; color: var(--color-text2); max-width: 580px; line-height: 1.65; }
+  strong { font-weight: 600; color: var(--color-text); }
+
+  .hub { max-width: 860px; margin: 0 auto; padding: 2rem; }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; padding-bottom: 1rem; border-bottom: 0.5px solid var(--color-border); }
+  .tab { font-size: 13px; font-weight: 500; padding: 7px 16px; border-radius: 999px; border: 0.5px solid var(--color-border2); background: transparent; color: var(--color-text2); cursor: pointer; transition: all 0.15s; font-family: var(--font-sans); letter-spacing: 0.01em; }
+  .tab:hover { background: var(--color-bg3); color: var(--color-text); }
+  .tab.on { background: var(--color-accent); color: #0f0f0f; border-color: var(--color-accent); font-weight: 600; }
+
+  .panel { display: none; }
+  .panel.on { display: block; }
+
+  .sec { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text3); margin-bottom: 12px; }
+
+  .card { background: var(--color-bg2); border: 0.5px solid var(--color-border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 12px; }
+  .card2 { background: var(--color-bg3); border-radius: var(--radius-md); padding: 10px 14px; margin-bottom: 8px; }
+  .label { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .sub { font-size: 12px; color: var(--color-text2); line-height: 1.55; }
+
+  .cal-item { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 0.5px solid var(--color-border); }
+  .cal-item:last-child { border-bottom: none; }
+  .cal-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .dot-red { background: var(--color-danger); }
+  .dot-amber { background: var(--color-warning); }
+  .cal-text { flex: 1; }
+  .cal-name { font-size: 13px; font-weight: 600; }
+  .cal-sub { font-size: 12px; color: var(--color-text2); margin-top: 2px; line-height: 1.5; }
+  .cal-freq { font-size: 11px; color: var(--color-text3); margin-top: 3px; }
+
+  /* Simulator */
+  .sim-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; }
+  .sim-col { flex: 1; min-width: 140px; }
+  .sim-col-label { font-size: 12px; color: var(--color-text2); margin-bottom: 6px; font-weight: 500; }
+  select { width: 100%; font-size: 13px; padding: 8px 10px; border-radius: var(--radius-md); border: 0.5px solid var(--color-border2); background: var(--color-bg2); color: var(--color-text); font-family: var(--font-sans); cursor: pointer; }
+  select:focus { outline: none; border-color: var(--color-accent); }
+  .sim-result { background: var(--color-bg2); border: 0.5px solid var(--color-border); border-left: 2px solid var(--color-info); border-radius: 0 var(--radius-lg) var(--radius-lg) 0; padding: 1rem 1.25rem; min-height: 90px; }
+  .res-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .res-body { font-size: 13px; color: var(--color-text2); line-height: 1.6; }
+  .impact-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .impact-chip { font-size: 12px; padding: 4px 10px; border-radius: 999px; font-weight: 600; }
+  .up { background: var(--color-success-bg); color: var(--color-success); }
+  .dn { background: var(--color-danger-bg); color: var(--color-danger); }
+  .nt { background: var(--color-bg3); color: var(--color-text2); }
+  .mx { background: var(--color-warning-bg); color: var(--color-warning); }
+  .sim-nota { margin-top: 10px; font-size: 12px; color: var(--color-text3); border-top: 0.5px solid var(--color-border); padding-top: 8px; line-height: 1.5; }
+
+  .legend-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1rem; }
+  .trap-card { background: var(--color-bg2); border: 0.5px solid var(--color-border); border-left: 2px solid var(--color-warning); border-radius: 0 var(--radius-lg) var(--radius-lg) 0; padding: 1rem 1.25rem; margin-top: 1rem; }
+  .trap-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--color-warning); }
+  .trap-body { font-size: 13px; color: var(--color-text2); line-height: 1.6; }
+
+  /* Framework */
+  .fw-card { background: var(--color-bg2); border: 0.5px solid var(--color-border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 12px; }
+  .fw-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+  .check-item { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 0.5px solid var(--color-border); }
+  .check-item:last-child { border-bottom: none; }
+  .check-num { font-size: 11px; font-weight: 700; min-width: 22px; height: 22px; border-radius: 50%; background: var(--color-bg3); color: var(--color-text2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .check-txt { font-size: 13px; color: var(--color-text2); line-height: 1.55; }
+  .check-txt strong { color: var(--color-text); font-weight: 600; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 1rem; }
+  .chip { font-size: 12px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--color-bg3); color: var(--color-text2); line-height: 1.5; }
+  .chip strong { color: var(--color-accent); font-weight: 600; display: block; margin-bottom: 3px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* Errors */
+  .err-item { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; border-bottom: 0.5px solid var(--color-border); }
+  .err-item:last-child { border-bottom: none; }
+  .err-num { font-size: 11px; font-weight: 700; min-width: 24px; height: 24px; border-radius: 50%; background: var(--color-danger-bg); color: var(--color-danger); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .err-txt { font-size: 13px; color: var(--color-text2); line-height: 1.6; }
+  .err-txt strong { color: var(--color-text); font-weight: 600; }
+
+  @media (max-width: 560px) {
+    .grid2 { grid-template-columns: 1fr; }
+    .sim-row { flex-direction: column; }
+    .hub { padding: 1.25rem; }
+    .header { padding: 2rem 1.25rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="max-width:860px;margin:0 auto">
+    <div class="header-label">Hub de conocimiento · Macro</div>
+    <h1>Leer noticias macro<br>como trader</h1>
+    <p>El mercado no reacciona al dato — reacciona a la <strong>desviación respecto al consenso</strong>. Calendario, simulador de reacciones, framework de lectura y errores típicos.</p>
+  </div>
+</div>
+
+<div class="hub">
+  <div class="tabs">
+    <button class="tab on" onclick="sw('calendario',this)">Calendario macro</button>
+    <button class="tab" onclick="sw('simulador',this)">Simulador de reacciones</button>
+    <button class="tab" onclick="sw('framework',this)">Framework de lectura</button>
+    <button class="tab" onclick="sw('errores',this)">Errores típicos</button>
+  </div>
+
+  <!-- CALENDARIO -->
+  <div class="panel on" id="p-calendario">
+    <div class="sec">Eventos macro por nivel de impacto</div>
+
+    <div class="card" style="border-left:2px solid var(--color-danger);border-radius:0 var(--radius-lg) var(--radius-lg) 0">
+      <div class="fw-title" style="color:var(--color-danger)">Impacto extremo — mueven todos tus activos</div>
+      <div class="cal-item">
+        <div class="cal-dot dot-red"></div>
+        <div class="cal-text">
+          <div class="cal-name">NFP — Nóminas no agrícolas EE.UU.</div>
+          <div class="cal-sub">El dato macro más importante del mes. Mueve USD, oro, índices, todo. Primer viernes de cada mes.</div>
+          <div class="cal-freq">Mensual · 13:30 CET</div>
+        </div>
+      </div>
+      <div class="cal-item">
+        <div class="cal-dot dot-red"></div>
+        <div class="cal-text">
+          <div class="cal-name">Decisión de tipos Fed (FOMC)</div>
+          <div class="cal-sub">8 veces al año. No solo la decisión — el dot plot y la rueda de prensa de Powell mueven más que el número.</div>
+          <div class="cal-freq">8x año · 20:00 CET</div>
+        </div>
+      </div>
+      <div class="cal-item">
+        <div class="cal-dot dot-red"></div>
+        <div class="cal-text">
+          <div class="cal-name">CPI — Inflación EE.UU.</div>
+          <div class="cal-sub">Core CPI es lo que más mira la Fed. Desviación de ±0.1% del consenso ya mueve el mercado significativamente.</div>
+          <div class="cal-freq">Mensual · 14:30 CET</div>
+        </div>
+      </div>
+      <div class="cal-item">
+        <div class="cal-dot dot-red"></div>
+        <div class="cal-text">
+          <div class="cal-name">Decisión de tipos BCE</div>
+          <div class="cal-sub">Mueve EUR/USD directamente. La rueda de prensa de Lagarde define la narrativa del trimestre.</div>
+          <div class="cal-freq">8x año · 14:15 CET</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="border-left:2px solid var(--color-warning);border-radius:0 var(--radius-lg) var(--radius-lg) 0">
+      <div class="fw-title" style="color:var(--color-warning)">Impacto alto — relevantes para tus pares y commodities</div>
+      <div class="cal-item">
+        <div class="cal-dot dot-amber"></div>
+        <div class="cal-text">
+          <div class="cal-name">PIB EE.UU. (GDP)</div>
+          <div class="cal-sub">Trimestral. Dos trimestres negativos consecutivos = recesión técnica = risk-off. Las revisiones también importan.</div>
+          <div class="cal-freq">Trimestral</div>
+        </div>
+      </div>
+      <div class="cal-item">
+        <div class="cal-dot dot-amber"></div>
+        <div class="cal-text">
+          <div class="cal-name">Inventarios EIA (petróleo)</div>
+          <div class="cal-sub">Cada miércoles. Si los inventarios bajan más de lo esperado, el WTI sube. Esencial si operas crudo.</div>
+          <div class="cal-freq">Semanal · miércoles · 16:30 CET</div>
+        </div>
+      </div>
+      <div class="cal-item">
+        <div class="cal-dot dot-amber"></div>
+        <div class="cal-text">
+          <div class="cal-name">PMI manufacturero y de servicios</div>
+          <div class="cal-sub">Por encima de 50 = expansión. Debajo = contracción. El flash PMI sale antes que el oficial. Es un indicador adelantado.</div>
+          <div class="cal-freq">Mensual</div>
+        </div>
+      </div>
+      <div class="cal-item">
+        <div class="cal-dot dot-amber"></div>
+        <div class="cal-text">
+          <div class="cal-name">ISM manufacturero / servicios EE.UU.</div>
+          <div class="cal-sub">Similar al PMI pero para EE.UU. El ISM servicios mueve más el mercado que el manufacturero actualmente.</div>
+          <div class="cal-freq">Mensual · primer/tercer lunes del mes</div>
+        </div>
+      </div>
+      <div class="cal-item">
+        <div class="cal-dot dot-amber"></div>
+        <div class="cal-text">
+          <div class="cal-name">Ventas al por menor EE.UU.</div>
+          <div class="cal-sub">Mide la salud del consumidor americano. Fuerte → USD sube, índices posiblemente también.</div>
+          <div class="cal-freq">Mensual</div>
+        </div>
+      </div>
+      <div class="cal-item">
+        <div class="cal-dot dot-amber"></div>
+        <div class="cal-text">
+          <div class="cal-name">Reunión OPEP+</div>
+          <div class="cal-sub">Decisiones de producción. Un recorte inesperado dispara el Brent inmediatamente.</div>
+          <div class="cal-freq">Irregular · según convocatoria</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card2">
+      <div class="label">Herramientas para seguir el calendario</div>
+      <div class="sub" style="margin-top:4px">Investing.com/economic-calendar · Forexfactory.com · Bloomberg Economic Calendar. Filtra siempre por impacto alto (3 toros en FF o círculo rojo en Investing).</div>
+    </div>
+  </div>
+
+  <!-- SIMULADOR -->
+  <div class="panel" id="p-simulador">
+    <div class="sec">¿Cómo reacciona el mercado? — elige el evento y el resultado</div>
+
+    <div class="sim-row">
+      <div class="sim-col">
+        <div class="sim-col-label">Evento macro</div>
+        <select id="sel-evento" onchange="calcReaction()">
+          <option value="nfp">NFP — nóminas EE.UU.</option>
+          <option value="cpi">CPI — inflación EE.UU.</option>
+          <option value="fomc">Decisión Fed (FOMC)</option>
+          <option value="bce">Decisión BCE</option>
+          <option value="gdp">PIB EE.UU. (GDP)</option>
+          <option value="eia">Inventarios EIA petróleo</option>
+          <option value="pmi">PMI global</option>
+          <option value="opep">Reunión OPEP+</option>
+        </select>
+      </div>
+      <div class="sim-col">
+        <div class="sim-col-label">Resultado vs consenso</div>
+        <select id="sel-result" onchange="calcReaction()">
+          <option value="beat_big">Supera mucho al consenso</option>
+          <option value="beat_small">Supera levemente</option>
+          <option value="inline">En línea con el consenso</option>
+          <option value="miss_small">Por debajo levemente</option>
+          <option value="miss_big">Por debajo mucho</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="sim-result" id="sim-out">
+      <div class="res-title" style="color:var(--color-text2)">Selecciona evento y resultado</div>
+      <div class="res-body">La reacción esperada del mercado aparecerá aquí.</div>
+    </div>
+
+    <div style="margin-top:1rem">
+      <div class="sec">Leyenda de reacciones</div>
+      <div class="legend-row">
+        <span class="impact-chip up">Sube</span>
+        <span class="impact-chip dn">Baja</span>
+        <span class="impact-chip nt">Sin impacto claro</span>
+        <span class="impact-chip mx">Reacción mixta / volátil</span>
+      </div>
+    </div>
+
+    <div class="trap-card">
+      <div class="trap-label">La trampa del "buy the rumor, sell the news"</div>
+      <div class="trap-body">Si el mercado anticipó el dato bueno durante semanas (precio ya subió), cuando sale el dato positivo puede <strong>bajar</strong> porque los que compraron antes venden la noticia. Este fenómeno ocurre especialmente en decisiones del FOMC muy bien telegrafíadas. Siempre chequea si el precio ya se movió antes del evento.</div>
+    </div>
+  </div>
+
+  <!-- FRAMEWORK -->
+  <div class="panel" id="p-framework">
+    <div class="sec">El proceso de lectura del trader — antes, durante y después</div>
+
+    <div class="fw-card" style="border-left:2px solid var(--color-info);border-radius:0 var(--radius-lg) var(--radius-lg) 0">
+      <div class="fw-title" style="color:var(--color-info)">Antes del evento — preparación (el día anterior)</div>
+      <div class="check-item"><div class="check-num">1</div><div class="check-txt"><strong>Consulta el consenso.</strong> ¿Qué espera el mercado? Bloomberg, Reuters, Investing te dan la estimación. Ese número es tu referencia absoluta.</div></div>
+      <div class="check-item"><div class="check-num">2</div><div class="check-txt"><strong>Revisa el dato anterior.</strong> Si el anterior fue revisado al alza, el actual tiene que superar ese umbral revisado, no el original publicado.</div></div>
+      <div class="check-item"><div class="check-num">3</div><div class="check-txt"><strong>Lee la narrativa dominante.</strong> ¿Está el mercado en modo "inflación" o en modo "recesión"? El mismo dato se interpreta diferente según el contexto narrativo del momento.</div></div>
+      <div class="check-item"><div class="check-num">4</div><div class="check-txt"><strong>Revisa el precio previo.</strong> ¿Ya se movió? Si el EUR/USD subió 150 pips esta semana "en anticipación al BCE", el mercado ya descontó la subida. El riesgo es asimétrico.</div></div>
+    </div>
+
+    <div class="fw-card" style="border-left:2px solid var(--color-warning);border-radius:0 var(--radius-lg) var(--radius-lg) 0">
+      <div class="fw-title" style="color:var(--color-warning)">Durante el evento — la ventana de los 5 minutos</div>
+      <div class="check-item"><div class="check-num">1</div><div class="check-txt"><strong>El primer movimiento es emocional.</strong> Los primeros 30-90 segundos son algorítmicos y exagerados. No operes en esa ventana salvo que seas scalper con spreads muy bajos.</div></div>
+      <div class="check-item"><div class="check-num">2</div><div class="check-txt"><strong>Espera la confirmación de dirección.</strong> En los primeros 3-5 minutos el mercado hace su revaluación real. Esa dirección suele mantenerse 30-60 minutos.</div></div>
+      <div class="check-item"><div class="check-num">3</div><div class="check-txt"><strong>Cuidado con los datos múltiples.</strong> El NFP trae desempleo, salarios y participación laboral. A veces uno es bueno y otro malo. El mercado tarda más en procesar. Espera.</div></div>
+      <div class="check-item"><div class="check-num">4</div><div class="check-txt"><strong>Si hay rueda de prensa (Fed, BCE), espera al discurso.</strong> El número inicial es 30% del impacto. El discurso del banquero central es el 70% restante.</div></div>
+    </div>
+
+    <div class="fw-card" style="border-left:2px solid var(--color-success);border-radius:0 var(--radius-lg) var(--radius-lg) 0">
+      <div class="fw-title" style="color:var(--color-success)">Después del evento — la oportunidad real</div>
+      <div class="check-item"><div class="check-num">1</div><div class="check-txt"><strong>Identifica la narrativa que se instala.</strong> ¿El mercado ahora está en modo hawkish / dovish / risk-on / risk-off? Esa narrativa guiará el precio días o semanas.</div></div>
+      <div class="check-item"><div class="check-num">2</div><div class="check-txt"><strong>Busca el retroceso para entrar.</strong> El movimiento inicial suele retrazar 30-50% antes de continuar. Ese pullback al nivel pre-noticia es tu zona de entrada con el MATVARD.</div></div>
+      <div class="check-item"><div class="check-num">3</div><div class="check-txt"><strong>Actualiza tu sesgo de mercado.</strong> Si antes del NFP eras bajista en USD y el NFP salió muy fuerte, tu sesgo debe cambiar. No te cases con una tesis previa.</div></div>
+    </div>
+
+    <div style="margin-top:1rem">
+      <div class="sec">Modos de mercado y su interpretación</div>
+      <div class="grid2">
+        <div class="chip"><strong>Modo inflación</strong>Datos de empleo o CPI altos son malos para índices (más subidas de tipos). USD puede subir.</div>
+        <div class="chip"><strong>Modo recesión</strong>Datos de empleo débiles son malos para todo. Risk-off: oro y JPY suben.</div>
+        <div class="chip"><strong>Modo desinflación</strong>CPI bajando con empleo fuerte = goldilocks. Índices suben, USD mixto.</div>
+        <div class="chip"><strong>Modo pivot Fed</strong>Cualquier señal dovish dispara índices y oro, hunde USD.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ERRORES -->
+  <div class="panel" id="p-errores">
+    <div class="sec">Los 7 errores más comunes leyendo noticias macro</div>
+    <div class="card">
+      <div class="err-item"><div class="err-num">1</div><div class="err-txt"><strong>Operar el primer tick.</strong> El spike inicial es el peor momento para entrar. Los algoritmos abren posiciones enormes en milisegundos y el spread se dispara. Si entras ahí, pagas el peor precio y el stop más difuso.</div></div>
+      <div class="err-item"><div class="err-num">2</div><div class="err-txt"><strong>Confundir absoluto con relativo.</strong> Un CPI al 2.5% puede ser alcista para el USD si el consenso era 2.1%, aunque sea bajo históricamente. El mercado opera deltas, no niveles absolutos.</div></div>
+      <div class="err-item"><div class="err-num">3</div><div class="err-txt"><strong>Ignorar la revisión del dato anterior.</strong> El NFP de hoy puede salir en 200k (bien), pero si el mes anterior fue revisado de 250k a 180k, el impacto real es negativo. Siempre lee la revisión.</div></div>
+      <div class="err-item"><div class="err-num">4</div><div class="err-txt"><strong>No conocer el modo de mercado vigente.</strong> En 2022 (modo inflación), empleo fuerte = mal para índices. En 2024 (modo recesión), empleo débil = también mal para índices. El mismo dato, reacciones opuestas.</div></div>
+      <div class="err-item"><div class="err-num">5</div><div class="err-txt"><strong>Cerrar la posición antes de la rueda de prensa.</strong> En los FOMC, el primer movimiento tras el comunicado escrito puede revertirse 180° en la rueda de prensa de Powell 30 minutos después.</div></div>
+      <div class="err-item"><div class="err-num">6</div><div class="err-txt"><strong>Mantener posición en el evento sin saberlo.</strong> Estás en una operación de swing y no miras el calendario. Sale el CPI y te destruye el stop. Revisa SIEMPRE el economic calendar antes de abrir cualquier posición con duración.</div></div>
+      <div class="err-item"><div class="err-num">7</div><div class="err-txt"><strong>Sobreponderar una sola fuente.</strong> Un titular de Bloomberg no es suficiente. El análisis macro real combina datos primarios (Fed, BCE, BLS) + indicadores adelantados (PMI) + flujos de capital (DXY, VIX) + posicionamiento (COT). Un dato aislado engaña.</div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const db = {
+  nfp: {
+    beat_big: { title: 'NFP muy por encima del consenso', body: 'El empleo americano sorprende al alza. La Fed tiene menos motivos para bajar tipos. Reacción inicial hawkish.', impacts: [{l:'USD',c:'up'},{l:'Oro',c:'dn'},{l:'S&P 500',c:'mx'},{l:'EUR/USD',c:'dn'},{l:'Bonos',c:'dn'}], nota: 'Ojo: si el mercado ya esperaba fortaleza y el precio había subido antes, puede ser "sell the news".' },
+    beat_small: { title: 'NFP levemente por encima', body: 'Dato positivo pero sin sorpresa grande. Movimiento moderado. El mercado puede reaccionar menos de lo esperado.', impacts: [{l:'USD',c:'up'},{l:'Oro',c:'nt'},{l:'S&P 500',c:'nt'},{l:'EUR/USD',c:'dn'}], nota: 'Reacción típica de 20-40 pips en EUR/USD. Oportunidad de scalp, no de swing.' },
+    inline: { title: 'NFP en línea con el consenso', body: 'Sin sorpresa. El mercado ya había descontado el dato. Volatilidad baja, movimiento mínimo.', impacts: [{l:'USD',c:'nt'},{l:'Oro',c:'nt'},{l:'S&P 500',c:'nt'}], nota: 'Cuando el dato sale "inline", el mercado vuelve rápido a su tendencia previa. Sigue tu análisis técnico.' },
+    miss_small: { title: 'NFP levemente por debajo', body: 'Empleo algo más débil. Presión bajista suave sobre el USD. Los índices reaccionan según el modo de mercado.', impacts: [{l:'USD',c:'dn'},{l:'Oro',c:'up'},{l:'S&P 500',c:'mx'},{l:'EUR/USD',c:'up'}], nota: 'En modo "recesión", incluso un miss pequeño puede causar caídas fuertes en índices.' },
+    miss_big: { title: 'NFP muy por debajo del consenso', body: 'Señal de debilidad económica clara. Risk-off inmediato. El mercado empieza a descontar más recortes de tipos.', impacts: [{l:'USD',c:'dn'},{l:'Oro',c:'up'},{l:'JPY',c:'up'},{l:'S&P 500',c:'dn'},{l:'EUR/USD',c:'up'}], nota: 'Este es el escenario de mayor volatilidad. Spreads se abren. Espera la confirmación antes de entrar.' }
+  },
+  cpi: {
+    beat_big: { title: 'CPI muy por encima del consenso', body: 'Inflación sorprende al alza. La Fed tiene que mantener tipos altos más tiempo. Mercado en modo hawkish.', impacts: [{l:'USD',c:'up'},{l:'Oro',c:'dn'},{l:'NQ/ES',c:'dn'},{l:'Bonos',c:'dn'},{l:'EUR/USD',c:'dn'}], nota: 'El Core CPI (sin energía ni alimentos) es lo que más mueve. Mira ese número primero.' },
+    beat_small: { title: 'CPI levemente por encima', body: 'Presión inflacionaria algo mayor de lo esperado. Fed puede retrasar recortes. USD se fortalece moderadamente.', impacts: [{l:'USD',c:'up'},{l:'Oro',c:'mx'},{l:'NQ/ES',c:'dn'},{l:'EUR/USD',c:'dn'}], nota: '' },
+    inline: { title: 'CPI en línea con el consenso', body: 'Inflación controlada y esperada. Sin sorpresas. El mercado puede incluso subir si venía con miedo a una sorpresa negativa.', impacts: [{l:'USD',c:'nt'},{l:'NQ/ES',c:'up'},{l:'Oro',c:'nt'}], nota: '"Alivio" si el mercado venía asustado de un dato peor. Movimiento de relief rally en índices posible.' },
+    miss_small: { title: 'CPI levemente por debajo', body: 'Inflación desacelerándose levemente. Señal positiva. La Fed tiene más margen para recortar tipos.', impacts: [{l:'USD',c:'dn'},{l:'Oro',c:'up'},{l:'NQ/ES',c:'up'},{l:'EUR/USD',c:'up'}], nota: 'Escenario constructivo para índices si el empleo sigue sólido. "Goldilocks" parcial.' },
+    miss_big: { title: 'CPI muy por debajo del consenso', body: 'Desinflación rápida. El mercado descuenta recortes de tipos agresivos. Euforia en índices, USD se hunde.', impacts: [{l:'USD',c:'dn'},{l:'Oro',c:'up'},{l:'NQ/ES',c:'up'},{l:'EUR/USD',c:'up'},{l:'Bonos',c:'up'}], nota: 'Rally explosivo en índices posible. Pero cuidado si la caída de precios señala recesión (deflación).' }
+  },
+  fomc: {
+    beat_big: { title: 'Fed más hawkish de lo esperado (sorpresa)', body: 'Subida de tipos inesperada o dot plot más agresivo. Risk-off severo.', impacts: [{l:'USD',c:'up'},{l:'Oro',c:'dn'},{l:'NQ/ES',c:'dn'},{l:'EUR/USD',c:'dn'},{l:'Bonos',c:'dn'}], nota: 'La rueda de prensa de Powell importa más que el número. Lee el tono: "firme" vs "pausado".' },
+    beat_small: { title: 'Fed ligeramente más hawkish', body: 'Mantiene tipos pero con tono restrictivo. USD se fortalece, índices bajo presión.', impacts: [{l:'USD',c:'up'},{l:'NQ/ES',c:'dn'},{l:'Oro',c:'dn'}], nota: '' },
+    inline: { title: 'Fed en línea con lo esperado', body: 'Decisión telegrafíada. Sin sorpresas. El mercado ya lo descontó. La rueda de prensa define el movimiento real.', impacts: [{l:'USD',c:'nt'},{l:'NQ/ES',c:'mx'},{l:'Oro',c:'nt'}], nota: 'El 80% del movimiento viene del discurso de Powell, no de la decisión escrita. Espera 30 min.' },
+    miss_small: { title: 'Fed ligeramente dovish', body: 'Señal de posibles recortes próximos. USD baja, índices y oro suben moderadamente.', impacts: [{l:'USD',c:'dn'},{l:'NQ/ES',c:'up'},{l:'Oro',c:'up'},{l:'EUR/USD',c:'up'}], nota: '' },
+    miss_big: { title: 'Fed muy dovish — recorte sorpresa o pivot', body: 'Recorte inesperado o señal clara de múltiples bajadas. Euforia en mercados. USD se desploma.', impacts: [{l:'USD',c:'dn'},{l:'NQ/ES',c:'up'},{l:'Oro',c:'up'},{l:'EUR/USD',c:'up'},{l:'BTC',c:'up'}], nota: 'El "Fed pivot" es el evento macro más explosivo. Puede mover el S&P 2-3% en una sesión.' }
+  },
+  bce: {
+    beat_big: { title: 'BCE más hawkish de lo esperado', body: 'Subida de tipos o tono restrictivo sorpresa. EUR sube fuerte. Índices europeos bajo presión.', impacts: [{l:'EUR/USD',c:'up'},{l:'DAX',c:'dn'},{l:'CAC',c:'dn'},{l:'Bono alemán',c:'dn'}], nota: 'Si el mercado esperaba 25pb y suben 50pb, el EUR puede subir 100-150 pips en minutos.' },
+    beat_small: { title: 'BCE ligeramente hawkish', body: 'Subida esperada pero tono más firme de lo previsto. EUR se aprecia moderadamente.', impacts: [{l:'EUR/USD',c:'up'},{l:'DAX',c:'mx'}], nota: '' },
+    inline: { title: 'BCE en línea con el consenso', body: 'Sin sorpresas. El mercado mueve poco. La rueda de prensa de Lagarde y el lenguaje sobre futuros movimientos manda.', impacts: [{l:'EUR/USD',c:'nt'},{l:'DAX',c:'nt'}], nota: 'Ojo a los comentarios sobre el QT (reducción de balance). Eso puede mover más que la tasa en sí.' },
+    miss_small: { title: 'BCE ligeramente dovish', body: 'Señal de pausa o recorte próximo. EUR baja suavemente. DAX puede subir.', impacts: [{l:'EUR/USD',c:'dn'},{l:'DAX',c:'up'},{l:'CAC',c:'up'}], nota: '' },
+    miss_big: { title: 'BCE muy dovish — recorte sorpresa', body: 'Recorte inesperado o lenguaje muy acomodaticio. EUR se hunde, índices europeos se disparan.', impacts: [{l:'EUR/USD',c:'dn'},{l:'DAX',c:'up'},{l:'CAC',c:'up'},{l:'Oro EUR',c:'up'}], nota: 'Si el BCE recorta mientras la Fed no lo hace, el diferencial de tipos aplasta al EUR/USD.' }
+  },
+  gdp: {
+    beat_big: { title: 'PIB EE.UU. muy por encima del consenso', body: 'Economía americana más fuerte de lo esperado. Risk-on. La Fed puede mantener tipos altos más tiempo.', impacts: [{l:'USD',c:'up'},{l:'S&P 500',c:'up'},{l:'Oro',c:'dn'},{l:'EUR/USD',c:'dn'}], nota: 'El primer dato es "advance". Hay dos revisiones posteriores que también mueven el mercado.' },
+    beat_small: { title: 'PIB levemente por encima', body: 'Crecimiento sólido. Positivo para índices y USD.', impacts: [{l:'USD',c:'up'},{l:'S&P 500',c:'up'}], nota: '' },
+    inline: { title: 'PIB en línea con el consenso', body: 'Sin sorpresas. El mercado ignora el dato principalmente.', impacts: [{l:'USD',c:'nt'},{l:'S&P 500',c:'nt'}], nota: '' },
+    miss_small: { title: 'PIB levemente por debajo', body: 'Crecimiento algo más débil. Presión bajista sobre USD. Índices mixtos.', impacts: [{l:'USD',c:'dn'},{l:'S&P 500',c:'mx'},{l:'Oro',c:'up'}], nota: '' },
+    miss_big: { title: 'PIB muy por debajo — señal recesiva', body: 'Si es negativo dos trimestres consecutivos = recesión técnica. Risk-off severo.', impacts: [{l:'USD',c:'dn'},{l:'S&P 500',c:'dn'},{l:'Oro',c:'up'},{l:'JPY',c:'up'},{l:'EUR/USD',c:'mx'}], nota: 'Paradójicamente el USD puede subir si la recesión es global (refugio). Depende del contexto.' }
+  },
+  eia: {
+    beat_big: { title: 'Inventarios EIA caen mucho más de lo esperado', body: 'Demanda de petróleo muy fuerte o producción menor. WTI sube inmediatamente.', impacts: [{l:'WTI/Brent',c:'up'},{l:'CAD',c:'up'},{l:'NOK',c:'up'}], nota: 'Una desviación de más de 3M de barriles respecto al consenso ya es significativa.' },
+    beat_small: { title: 'Inventarios bajan levemente más de lo esperado', body: 'Ligera presión alcista en el crudo.', impacts: [{l:'WTI/Brent',c:'up'},{l:'CAD',c:'mx'}], nota: '' },
+    inline: { title: 'Inventarios en línea con el consenso', body: 'Sin sorpresa en el crudo. El precio no se mueve significativamente por el dato.', impacts: [{l:'WTI/Brent',c:'nt'}], nota: '' },
+    miss_small: { title: 'Inventarios suben levemente más de lo esperado', body: 'Oferta algo mayor o demanda más débil. Presión bajista suave en el WTI.', impacts: [{l:'WTI/Brent',c:'dn'},{l:'CAD',c:'dn'}], nota: '' },
+    miss_big: { title: 'Inventarios suben mucho más de lo esperado', body: 'Exceso de oferta claro. WTI cae. Puede amplificarse si hay contexto de debilidad de demanda china.', impacts: [{l:'WTI/Brent',c:'dn'},{l:'CAD',c:'dn'},{l:'NOK',c:'dn'},{l:'Energía',c:'dn'}], nota: 'Si coincide con debilidad de PMI chino esa semana, el movimiento bajista en WTI puede ser violento.' }
+  },
+  pmi: {
+    beat_big: { title: 'PMI global muy por encima de 50 (expansión fuerte)', body: 'Actividad manufacturera y de servicios en expansión sólida. Risk-on global.', impacts: [{l:'Índices',c:'up'},{l:'Cobre',c:'up'},{l:'AUD',c:'up'},{l:'Oro',c:'dn'}], nota: 'PMI de servicios > manufactura en impacto actual. El sector servicios es 70-80% del PIB occidental.' },
+    beat_small: { title: 'PMI levemente por encima de 50', body: 'Expansión moderada. Positivo pero sin fuegos artificiales.', impacts: [{l:'Índices',c:'up'},{l:'Cobre',c:'up'}], nota: '' },
+    inline: { title: 'PMI en línea con 50 (estancamiento)', body: 'Actividad en punto de inflexión. El mercado interpreta esto como señal de alerta.', impacts: [{l:'Índices',c:'nt'},{l:'Cobre',c:'nt'}], nota: 'Si venía de 55 y cae a 50, es bearish aunque técnicamente sea "expansión".' },
+    miss_small: { title: 'PMI entre 48-50 (leve contracción)', body: 'Primeras señales de desaceleración. Presión en activos cíclicos.', impacts: [{l:'Índices',c:'dn'},{l:'Cobre',c:'dn'},{l:'AUD',c:'dn'},{l:'Oro',c:'up'}], nota: '' },
+    miss_big: { title: 'PMI por debajo de 45 (contracción fuerte)', body: 'Señal recesiva clara. Risk-off. Fuga hacia activos refugio.', impacts: [{l:'Índices',c:'dn'},{l:'Cobre',c:'dn'},{l:'AUD',c:'dn'},{l:'USD',c:'up'},{l:'JPY',c:'up'},{l:'Oro',c:'up'}], nota: 'PMI < 45 históricamente coincide con periodos de riesgo elevado en mercados. Reduce exposición.' }
+  },
+  opep: {
+    beat_big: { title: 'OPEP+ anuncia recorte de producción mayor al esperado', body: 'Restricción de oferta agresiva. El Brent sube fuertemente. Divisas de países productores se aprecian.', impacts: [{l:'Brent/WTI',c:'up'},{l:'CAD',c:'up'},{l:'RUB',c:'up'},{l:'Inflación',c:'mx'}], nota: 'Un recorte de +1M b/d puede mover el Brent 3-5% en la sesión. Los futuros del crudo lideran.' },
+    beat_small: { title: 'OPEP+ recorta levemente más de lo esperado', body: 'Presión alcista moderada en el crudo.', impacts: [{l:'Brent/WTI',c:'up'},{l:'CAD',c:'up'}], nota: '' },
+    inline: { title: 'OPEP+ decide en línea con lo esperado', body: 'Sin sorpresa. El crudo puede incluso retroceder si el mercado tenía posiciones largas especulativas.', impacts: [{l:'Brent/WTI',c:'nt'}], nota: 'Clásico "buy the rumor, sell the news". Si el crudo subió antes de la reunión, el mantenimiento puede causar caída.' },
+    miss_small: { title: 'OPEP+ aumenta producción levemente', body: 'Más oferta de lo esperado. Presión bajista moderada.', impacts: [{l:'Brent/WTI',c:'dn'},{l:'CAD',c:'dn'}], nota: '' },
+    miss_big: { title: 'OPEP+ aumenta producción o rompe acuerdo', body: 'Desacuerdo interno o producción mucho mayor. El Brent puede caer 5-8%.', impacts: [{l:'Brent/WTI',c:'dn'},{l:'CAD',c:'dn'},{l:'NOK',c:'dn'},{l:'Energía',c:'dn'}], nota: 'Las guerras de precio dentro de la OPEP (como 2020 Arabia-Rusia) son los eventos más destructivos para el crudo.' }
+  }
+};
+
+function sw(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+  document.getElementById('p-' + id).classList.add('on');
+  btn.classList.add('on');
+}
+
+function calcReaction() {
+  const ev = document.getElementById('sel-evento').value;
+  const res = document.getElementById('sel-result').value;
+  const d = db[ev]?.[res];
+  if (!d) return;
+  const impactsHtml = d.impacts.map(i => `<span class="impact-chip ${i.c}">${i.l}</span>`).join('');
+  const notaHtml = d.nota ? `<div class="sim-nota">${d.nota}</div>` : '';
+  document.getElementById('sim-out').innerHTML = `
+    <div class="res-title">${d.title}</div>
+    <div class="res-body">${d.body}</div>
+    <div class="impact-row">${impactsHtml}</div>
+    ${notaHtml}
+  `;
+}
+calcReaction();
+</script>
+</body>
+</html>
